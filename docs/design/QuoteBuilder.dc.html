@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif; color: #1c1b18; background: #f4f3f0; -webkit-font-smoothing: antialiased; }
+    a { color: #2f5d8a; } a:hover { color: #244a70; }
+  </style>
+</helmet>
+<div style="width: 1440px; height: 1480px; display: flex; flex-direction: column; background: #f4f3f0; overflow: hidden;">
+
+  <!-- Header -->
+  <div style="display: flex; align-items: center; gap: 14px; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid #e2e0da;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px; font-weight: 600;">Extra Works Request</span>
+        <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 13px; color: #2f5d8a;">SANC004958</span>
+        <span style="font-size: 12px; color: #6b6963;">version 1</span>
+      </div>
+      <span style="font-size: 13px; color: #4a4843;">31 Cathedral Drive, Basildon SS15 5WF · Garage door · Sanctuary template V1.0 (2025)</span>
+    </div>
+    <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #fbe9e7; color: #8a2f2a;"><span style="width: 7px; height: 7px; border-radius: 50%; background: #b3403a;"></span>To check &amp; amend</span>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 12px; color: #8a8780;">Saved 2 min ago</span>
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 1px solid #d9d6cf; border-radius: 8px; background: #ffffff; font-size: 13px; color: #4a4843;">Back to job pack</div>
+      <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; border-radius: 8px; background: #2f5d8a; color: #ffffff; font-size: 13px; font-weight: 500; box-shadow: 0 6px 16px rgba(47,93,138,0.28);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6"></path><path d="M8 13h8M8 17h8M12 13v4"></path></svg>
+        <span>Export Sanctuary spreadsheet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div style="flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; padding: 20px 32px; min-height: 0;">
+
+    <!-- Form -->
+    <div style="display: flex; flex-direction: column; gap: 14px; min-width: 0;">
+
+      <!-- Request details -->
+      <div class="section" style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 600;">Request details</span>
+          <span style="font-size: 11px; color: #6b6963;">same fields as the top of the client's Main Sheet</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Contractor</span><div style="display: flex; align-items: center; justify-content: space-between; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;"><span>R Dunham</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b6963" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Contact name</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">Bill Beach</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Contact no.</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">0208 7091700</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Email</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">admin@r-dunham.co.uk</div></div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Date</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">24/08/2026</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px; grid-column: span 2;"><span style="font-size: 11px; color: #6b6963;">Property address</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">31 Cathedral Drive, Basildon, SS15 5WF</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Functional location (if available)</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px; color: #b0aca3;">optional</div></div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Location of works in property</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">Garage Door</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Type of works</span><div style="display: flex; align-items: center; justify-content: space-between; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;"><span>Quoted Works</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b6963" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Original work order</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px; font-family: 'IBM Plex Mono', ui-monospace, monospace;">SANC004958</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Original purchase order</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px; font-family: 'IBM Plex Mono', ui-monospace, monospace;">4501849778</div></div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Date issued</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">11/08/2026</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Request version no.</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px;">1</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Quote (if applicable)</span><div style="display: flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #d9d6cf; border-radius: 6px; font-size: 13px; color: #b0aca3;">optional</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; color: #6b6963;">Priority</span>
+            <div style="display: flex; height: 34px; border: 1px solid #d9d6cf; border-radius: 6px; overflow: hidden; font-size: 12px;">
+              <span style="flex: 1; display: flex; align-items: center; justify-content: center; color: #6b6963;">Emergency</span>
+              <span style="flex: 1; display: flex; align-items: center; justify-content: center; color: #6b6963; border-left: 1px solid #d9d6cf;">Urgent</span>
+              <span style="flex: 1; display: flex; align-items: center; justify-content: center; background: #2f5d8a; color: #ffffff; font-weight: 500;">Routine</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary of works -->
+      <div class="section" style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 600;">Summary of works required &amp; additional comments</span>
+          <span style="font-size: 11px; color: #6b6963;">brought in from the engineer's report · edit freely</span>
+        </div>
+        <div style="font-size: 13px; line-height: 1.55; padding: 12px 14px; border: 1px solid #d9d6cf; border-radius: 8px; min-height: 84px;">Attended on 24/08/2026 to assess garage door. The up and over garage door needs to be removed entirely for repairs to be carried out to the door itself as well as to allow all components to be replaced, including the rollers and channels, cables, lock and repairs to the frame. The door is quite large and heavy, to carry out works safely we would require 2 engineers to attend in order to remove the door to carry out the repairs and then refit and adjust as necessary to allow the door to open and close properly.</div>
+      </div>
+
+      <!-- Schedule of works -->
+      <div class="section" style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; position: relative;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 600;">Schedule of works</span>
+          <span style="font-size: 11px; color: #6b6963;">SOR codes · NHF v8 · 3,581 codes from the client's own template</span>
+        </div>
+
+        <div style="position: relative;">
+          <div style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid #2f5d8a; border-radius: 8px; background: #ffffff; box-shadow: 0 0 0 3px rgba(47,93,138,0.14); font-size: 13px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2f5d8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <span>garage door repair</span>
+            <span style="width: 1px; height: 16px; background: #2f5d8a;"></span>
+            <span style="margin-left: auto; font-size: 11px; color: #8a8780;">type a code or plain words · Enter adds the highlighted line</span>
+          </div>
+          <div class="menu" style="position: absolute; left: 0; right: 0; top: 44px; z-index: 5; background: #ffffff; border: 1px solid #d9d6cf; border-radius: 10px; box-shadow: 0 18px 40px rgba(28,27,24,0.18); padding: 6px; display: flex; flex-direction: column; gap: 2px;">
+            <div style="display: grid; grid-template-columns: 76px minmax(0, 1fr) 150px 40px 70px; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 6px; background: #e9eef4; font-size: 12px;">
+              <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345603</span>
+              <span style="font-weight: 500;">GARAGE DOOR: REPAIR UP AND OVER METAL</span>
+              <span style="color: #6b6963;">Garage Doors and Frames</span>
+              <span style="color: #6b6963;">IT</span>
+              <span style="text-align: right;">£58.81</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 76px minmax(0, 1fr) 150px 40px 70px; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 6px; font-size: 12px;">
+              <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345602</span>
+              <span>GARAGE DOOR: EASE AND ADJUST UP AND OVER</span>
+              <span style="color: #6b6963;">Garage Doors and Frames</span>
+              <span style="color: #6b6963;">IT</span>
+              <span style="text-align: right;">£36.28</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 76px minmax(0, 1fr) 150px 40px 70px; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 6px; font-size: 12px;">
+              <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345601</span>
+              <span>GARAGE DOOR: REMOVE AND REFIX UP AND OVER</span>
+              <span style="color: #6b6963;">Garage Doors and Frames</span>
+              <span style="color: #6b6963;">IT</span>
+              <span style="text-align: right;">£86.31</span>
+            </div>
+            <div style="padding: 6px 10px 2px 10px; font-size: 11px; color: #8a8780;">Searching the code list on this PC · 14 matches</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; margin-top: 196px;">
+          <div style="display: grid; grid-template-columns: 28px 150px 76px 50px minmax(0, 1fr) 44px 80px 96px 88px 28px; gap: 10px; padding: 6px 10px; font-size: 11px; color: #6b6963; border-bottom: 1px solid #e2e0da;">
+            <span>#</span><span>Works</span><span>SOR</span><span>Qty</span><span>Short description</span><span>UOM</span><span style="text-align: right;">Base rate</span><span style="text-align: right;">Adjusted (−7.5%)</span><span style="text-align: right;">Line value</span><span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 28px 150px 76px 50px minmax(0, 1fr) 44px 80px 96px 88px 28px; gap: 10px; align-items: center; padding: 9px 10px; font-size: 12px; border-bottom: 1px solid #efede8;">
+            <span style="color: #8a8780;">1</span><span style="color: #4a4843;">Garage Doors and Frames</span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345613</span><span style="display: flex; align-items: center; justify-content: center; height: 28px; border: 1px solid #d9d6cf; border-radius: 5px;">1</span><span>GARAGE DOOR: RENEW ROLLERS AND CHANNELS</span><span style="color: #6b6963;">IT</span><span style="text-align: right;">£72.64</span><span style="text-align: right;">£67.19</span><span style="text-align: right; font-weight: 500;">£67.19</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aca3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: 28px 150px 76px 50px minmax(0, 1fr) 44px 80px 96px 88px 28px; gap: 10px; align-items: center; padding: 9px 10px; font-size: 12px; border-bottom: 1px solid #efede8;">
+            <span style="color: #8a8780;">2</span><span style="color: #4a4843;">Garage Doors and Frames</span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345611</span><span style="display: flex; align-items: center; justify-content: center; height: 28px; border: 1px solid #d9d6cf; border-radius: 5px;">1</span><span>GARAGE DOOR: RENEW LOCK TO UP AND OVER</span><span style="color: #6b6963;">NO</span><span style="text-align: right;">£26.47</span><span style="text-align: right;">£24.48</span><span style="text-align: right; font-weight: 500;">£24.48</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aca3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: 28px 150px 76px 50px minmax(0, 1fr) 44px 80px 96px 88px 28px; gap: 10px; align-items: center; padding: 9px 10px; font-size: 12px; border-bottom: 1px solid #efede8;">
+            <span style="color: #8a8780;">3</span><span style="color: #4a4843;">Garage Doors and Frames</span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345605</span><span style="display: flex; align-items: center; justify-content: center; height: 28px; border: 1px solid #d9d6cf; border-radius: 5px;">1</span><span>GARAGE DOOR: RENEW SPINDLE/ROLLER/CABLE</span><span style="color: #6b6963;">NO</span><span style="text-align: right;">£39.73</span><span style="text-align: right;">£36.75</span><span style="text-align: right; font-weight: 500;">£36.75</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aca3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: 28px 150px 76px 50px minmax(0, 1fr) 44px 80px 96px 88px 28px; gap: 10px; align-items: center; padding: 9px 10px; font-size: 12px; border-bottom: 1px solid #efede8;">
+            <span style="color: #8a8780;">4</span><span style="color: #4a4843;">Garage Doors and Frames</span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345601</span><span style="display: flex; align-items: center; justify-content: center; height: 28px; border: 1px solid #d9d6cf; border-radius: 5px;">1</span><span>GARAGE DOOR: REMOVE AND REFIX UP AND OVER</span><span style="color: #6b6963;">IT</span><span style="text-align: right;">£86.31</span><span style="text-align: right;">£79.84</span><span style="text-align: right; font-weight: 500;">£79.84</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aca3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: 28px 150px 76px 50px minmax(0, 1fr) 44px 80px 96px 88px 28px; gap: 10px; align-items: center; padding: 9px 10px; font-size: 12px; border-bottom: 1px solid #efede8;">
+            <span style="color: #8a8780;">5</span><span style="color: #4a4843;">Garage Doors and Frames</span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345602</span><span style="display: flex; align-items: center; justify-content: center; height: 28px; border: 1px solid #d9d6cf; border-radius: 5px;">1</span><span>GARAGE DOOR: EASE AND ADJUST UP AND OVER</span><span style="color: #6b6963;">IT</span><span style="text-align: right;">£36.28</span><span style="text-align: right;">£33.56</span><span style="text-align: right; font-weight: 500;">£33.56</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aca3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: 28px 150px 76px 50px minmax(0, 1fr) 44px 80px 96px 88px 28px; gap: 10px; align-items: center; padding: 9px 10px; font-size: 12px; border-bottom: 1px solid #efede8;">
+            <span style="color: #8a8780;">6</span><span style="color: #4a4843;">Garage Doors and Frames</span><span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; color: #2f5d8a;">345603</span><span style="display: flex; align-items: center; justify-content: center; height: 28px; border: 1px solid #d9d6cf; border-radius: 5px;">1</span><span>GARAGE DOOR: REPAIR UP AND OVER METAL</span><span style="color: #6b6963;">IT</span><span style="text-align: right;">£58.81</span><span style="text-align: right;">£54.40</span><span style="text-align: right; font-weight: 500;">£54.40</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aca3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 10px 10px 2px 10px; font-size: 12px; color: #6b6963;">
+            <span>6 of 31 lines on the Main Sheet · the Continuation Sheet fills automatically after line 31</span>
+            <span style="margin-left: auto; font-weight: 600; color: #1c1b18;">Main Sheet total £296.22</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Non-SOR -->
+      <div class="section" style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 600;">Non-SOR works</span>
+          <span style="font-size: 11px; color: #6b6963;">labour, materials and anything without a code · goes to the Non SOR Works sheet</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 28px 120px 50px minmax(0, 1fr) 44px 80px 88px 28px; gap: 10px; padding: 6px 10px; font-size: 11px; color: #6b6963; border-bottom: 1px solid #e2e0da;">
+          <span>#</span><span>Works</span><span>Qty</span><span>Description</span><span>UOM</span><span style="text-align: right;">Rate</span><span style="text-align: right;">Line value</span><span></span>
+        </div>
+        <div style="display: grid; grid-template-columns: 28px 120px 50px minmax(0, 1fr) 44px 80px 88px 28px; gap: 10px; align-items: center; padding: 6px 10px; font-size: 12px;">
+          <span style="color: #8a8780;">1</span><span>Labour</span><span style="display: flex; align-items: center; justify-content: center; height: 28px; border: 1px solid #d9d6cf; border-radius: 5px;">4</span><span>Size of garage door requires 2 engineers to safely remove and refix and carry out overhauling works</span><span style="color: #6b6963;">HR</span><span style="text-align: right;">£34.00</span><span style="text-align: right; font-weight: 500;">£136.00</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0aca3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #2f5d8a; font-weight: 500; padding: 2px 10px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          <span>Add a line</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right rail -->
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div class="section" style="background: #1f2a36; color: #ffffff; border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 12px 28px rgba(31,42,54,0.28);">
+        <span style="font-size: 12px; color: #9aa6b4;">Totals · Sanctuary rate adjustment applied</span>
+        <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: #d6dbe2;">Main Sheet</span><span>£296.22</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: #d6dbe2;">Continuation Sheet</span><span>£0.00</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: #d6dbe2;">Non-SOR works</span><span>£136.00</span></div>
+        <div style="height: 1px; background: #34445a; margin: 4px 0;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;"><span style="font-size: 13px; font-weight: 500;">Total cost</span><span style="font-size: 24px; font-weight: 600;">£432.22</span></div>
+        <div style="font-size: 11px; color: #9aa6b4; line-height: 1.45;">R Dunham −7.5% on SOR base rates. Base total £320.24 is under £20,000, so the under-20k rate applies. Same maths as the client's sheet.</div>
+      </div>
+
+      <div class="section" style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 13px; font-weight: 600;">Before it goes out</span>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f7d4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg><span>Work order and PO present</span></div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f7d4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg><span>Address and postcode filled</span></div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f7d4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg><span>Summary of works written</span></div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f7d4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg><span>Every line has a quantity</span></div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f7d4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg><span>5 photos selected as evidence</span></div>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16h.01"></path><circle cx="12" cy="12" r="9"></circle></svg><span>Not yet checked by a second person</span></div>
+      </div>
+
+      <div class="section" style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #4a4843; line-height: 1.45;">
+        <span style="font-size: 13px; font-weight: 600; color: #1c1b18;">What export does</span>
+        <span>Writes these values into Sanctuary's own template file. Formulas, dropdowns, hidden sheets and the SOR table are left exactly as the client supplied them, so it opens and recalculates like a hand-filled copy.</span>
+        <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #2f5d8a; word-break: break-all;">123b27db-4501849778_SANC004958_31_Cathedral_Drive_Garage_door_SS15_5WF.xlsx</span>
+        <span>Saved into the job folder and the card moves to "Ready to send".</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

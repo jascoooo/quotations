@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif; color: #1c1b18; background: #f4f3f0; -webkit-font-smoothing: antialiased; }
+    a { color: #2f5d8a; } a:hover { color: #244a70; }
+  </style>
+</helmet>
+<div style="width: 1440px; height: 720px; background: #f4f3f0; padding: 36px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px;">
+
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <span style="font-size: 22px; font-weight: 600;">How it fits together</span>
+    <span style="font-size: 14px; color: #4a4843;">Everything that touches a tenant's address, an email or a photo stays on your PC or inside your own Microsoft 365. Hugging Face only ever sends things in.</span>
+  </div>
+
+  <!-- Boundary box -->
+  <div style="position: relative; border: 2px dashed #2f5d8a; border-radius: 16px; padding: 44px 28px 28px 28px; background: rgba(47,93,138,0.04); display: flex; flex-direction: column; gap: 22px;">
+    <span style="position: absolute; top: -13px; left: 24px; padding: 3px 12px; border-radius: 12px; background: #2f5d8a; color: #ffffff; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+      Your PC and your Microsoft 365 tenant. Nothing in here goes to anyone else.
+    </span>
+
+    <!-- Stations row -->
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr) 36px minmax(0, 1fr) 36px minmax(0, 1fr) 36px minmax(0, 1fr); gap: 0; align-items: stretch;">
+
+      <div style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 26px; height: 26px; border-radius: 7px; background: #e9eef4; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg></span>
+          <span style="font-size: 13px; font-weight: 600;">Shared mailbox</span>
+        </div>
+        <span style="font-size: 11px; color: #6b6963;">Outlook, as today</span>
+        <div style="font-size: 12px; color: #4a4843; line-height: 1.45; display: flex; flex-direction: column; gap: 4px;">
+          <span>Sanctuary requests with a work order and PO</span>
+          <span>Engineer reports with photos</span>
+          <span>Replies about access, changes, approvals</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center;"><svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="#8a8780" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h22M18 4l6 6-6 6"></path></svg></div>
+
+      <div style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 26px; height: 26px; border-radius: 7px; background: #e9eef4; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h6l2 3h8v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path><path d="M9 14h6M12 11v6"></path></svg></span>
+          <span style="font-size: 13px; font-weight: 600;">Auto-filing</span>
+        </div>
+        <span style="font-size: 11px; color: #6b6963;">Power Automate, inside your Microsoft 365</span>
+        <div style="font-size: 12px; color: #4a4843; line-height: 1.45; display: flex; flex-direction: column; gap: 4px;">
+          <span>Reads each new email, looks for SANC number, PO, address</span>
+          <span>Copies the email and its photos into the job's folder</span>
+          <span>Creates the card if the job is new; parks the rest under "needs a job"</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center;"><svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="#8a8780" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h22M18 4l6 6-6 6"></path></svg></div>
+
+      <div style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 26px; height: 26px; border-radius: 7px; background: #e9eef4; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>
+          <span style="font-size: 13px; font-weight: 600;">Job folders</span>
+        </div>
+        <span style="font-size: 11px; color: #6b6963;">SharePoint library plus a list for the stages</span>
+        <div style="font-size: 12px; color: #4a4843; line-height: 1.45; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: #2f5d8a;">SANC004958 – 31 Cathedral Drive/</span>
+          <span style="padding-left: 12px;">emails · photos · report · quote.xlsx</span>
+          <span>Stage lives on the card: to review, check &amp; amend, ready, sent</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center;"><svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="#8a8780" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h22M18 4l6 6-6 6"></path></svg></div>
+
+      <div style="background: #1f2a36; color: #ffffff; border: 1px solid #1f2a36; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 12px 28px rgba(31,42,54,0.25);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 26px; height: 26px; border-radius: 7px; background: #2f5d8a; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"></rect><rect x="10" y="4" width="5" height="10" rx="1"></rect><rect x="17" y="4" width="4" height="13" rx="1"></rect></svg></span>
+          <span style="font-size: 13px; font-weight: 600;">Quote desk</span>
+        </div>
+        <span style="font-size: 11px; color: #9aa6b4;">The screens on page 1. A web app that runs in your browser</span>
+        <div style="font-size: 12px; color: #d6dbe2; line-height: 1.45; display: flex; flex-direction: column; gap: 4px;">
+          <span>Board with drag and drop between stages</span>
+          <span>Job pack: details, emails, report, photos in one view</span>
+          <span>Quote builder with SOR search and live totals</span>
+          <span>AI runs inside the browser on this PC</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center;"><svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="#8a8780" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10h22M18 4l6 6-6 6"></path></svg></div>
+
+      <div style="background: #ffffff; border: 1px solid #e2e0da; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 26px; height: 26px; border-radius: 7px; background: #e6f4ea; display: flex; align-items: center; justify-content: center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f7d4f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6"></path><path d="M8 13h8M8 17h8M12 13v4"></path></svg></span>
+          <span style="font-size: 13px; font-weight: 600;">Sanctuary's template</span>
+        </div>
+        <span style="font-size: 11px; color: #6b6963;">Their .xlsx, filled, untouched otherwise</span>
+        <div style="font-size: 12px; color: #4a4843; line-height: 1.45; display: flex; flex-direction: column; gap: 4px;">
+          <span>Values written into the client's own file; formulas and dropdowns left alone</span>
+          <span>Saved into the job folder, named the way Sanctuary expects</span>
+          <span>Emailed with the ticked photos; card moves to Sent</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Second row: what runs where -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+      <div style="display: flex; gap: 10px; padding: 12px 14px; border-radius: 10px; background: #ffffff; border: 1px solid #e2e0da; font-size: 12px; color: #4a4843; line-height: 1.45;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f5d8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8M12 16v4"></path></svg>
+        <span><span style="font-weight: 600; color: #1c1b18;">On the PC, in the browser.</span> Reading the mailbox and folders, matching emails to jobs, SOR search, drafting the summary, filling the spreadsheet. No Python needed on the machine.</span>
+      </div>
+      <div style="display: flex; gap: 10px; padding: 12px 14px; border-radius: 10px; background: #ffffff; border: 1px solid #e2e0da; font-size: 12px; color: #4a4843; line-height: 1.45;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f5d8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M17 18a4 4 0 0 0 0-8 6 6 0 0 0-11.5-1A4.5 4.5 0 0 0 6 18z"></path></svg>
+        <span><span style="font-weight: 600; color: #1c1b18;">In your Microsoft 365.</span> The shared mailbox, the job folders, the stage list, and the copy-and-file flow that runs even when nobody is logged in. Microsoft already processes this data for you today.</span>
+      </div>
+      <div style="display: flex; gap: 10px; padding: 12px 14px; border-radius: 10px; background: #ffffff; border: 1px solid #e2e0da; font-size: 12px; color: #4a4843; line-height: 1.45;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f5d8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="6" y="6" width="12" height="12" rx="2"></rect><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path></svg>
+        <span><span style="font-weight: 600; color: #1c1b18;">AI, locally.</span> Small open models run inside the browser on the PC's own processor: find the right SOR codes from the report wording, tidy the summary, flag missing details. Every suggestion shows where it came from and waits for a person.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outside the boundary -->
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px;">
+    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 1px solid #e2e0da; background: #ffffff;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
+        <span style="width: 34px; height: 34px; border-radius: 9px; background: #fff3d6; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #7a4f0e;">HF</span>
+        <svg width="20" height="26" viewBox="0 0 20 26" fill="none" stroke="#b7791f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v18M4 14l6 6 6-6"></path></svg>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4a4843; line-height: 1.45;">
+        <span style="font-size: 13px; font-weight: 600; color: #1c1b18;">Hugging Face: one-way, inbound only</span>
+        <span>Supplies the open model files the browser downloads once and keeps. Can also host the app's code as a free static page if IT prefers that to SharePoint. It never receives an email, a photo, an address or a quote.</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; border: 1px solid #e2e0da; background: #ffffff;">
+      <span style="width: 34px; height: 34px; border-radius: 9px; background: #fbe9e7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b3403a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m5.5 5.5 13 13"></path></svg></span>
+      <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4a4843; line-height: 1.45;">
+        <span style="font-size: 13px; font-weight: 600; color: #1c1b18;">Not used for anything holding data</span>
+        <span>Python apps on Hugging Face Spaces, cloud AI services (Claude, ChatGPT, Gemini), and off-the-shelf job software would all mean a third company processing tenant data on US servers. Ruled out by your rule, and a UK GDPR restricted transfer besides.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
