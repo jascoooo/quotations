@@ -13,7 +13,7 @@
     a { color: #2f5d8a; } a:hover { color: #244a70; }
   </style>
 </helmet>
-<div style="width: 900px; min-height: 3600px; background: #ffffff; padding: 56px 72px 72px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px; font-size: 14px; line-height: 1.55; color: #1c1b18;">
+<div style="width: 900px; min-height: 4700px; background: #ffffff; padding: 56px 72px 72px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px; font-size: 14px; line-height: 1.55; color: #1c1b18;">
 
   <div style="display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; border-bottom: 2px solid #1c1b18;">
     <span style="font-size: 12px; color: #6b6963; letter-spacing: 0.04em; text-transform: uppercase;">Proposal · 10 September 2026 · draft for discussion</span>
@@ -36,20 +36,22 @@
   <!-- 2 -->
   <div style="display: flex; flex-direction: column; gap: 10px;">
     <span style="font-size: 18px; font-weight: 600;">2. The short answer</span>
-    <span>Build it in two layers, both inside what you already have. <span style="font-weight: 600;">Layer A</span> uses Microsoft 365 alone: a small automated flow files every email and photo into a job folder in SharePoint, a list in Board view gives you the four stages with drag and drop, and a script fills Sanctuary's template so that Excel itself saves it. That is a fortnight of setting up, no code to run anywhere, and no new approvals beyond mailbox access. <span style="font-weight: 600;">Layer B</span> is the sleek app on page 1: a web app that runs entirely in the browser on the work PC, signs in with your Microsoft account, reads the same folders and list, and does its AI work with open models from Hugging Face running locally in the browser. Hugging Face supplies model files and, if IT prefers, hosts the app's code; it never receives an email, a photo or a spreadsheet.</span>
-    <span>Python on a Hugging Face Space, cloud AI services and off-the-shelf job software are all set aside: each one means a new company holding tenant data on servers outside the UK. The comparison on the artboard beside this document sets out the four routes side by side.</span>
+    <span>Build it in two layers, both inside what you already have. <span style="font-weight: 600;">Layer A</span> uses Microsoft 365 alone: a small automated flow files every email and photo into a job folder in SharePoint, a list in Board view gives you the four stages with drag and drop, and a script fills Sanctuary's template so that Excel itself saves it. That is a fortnight of setting up, no code to run anywhere, and no new approvals beyond mailbox access. <span style="font-weight: 600;">Layer B</span> is the sleek app on page 1: a web app that runs entirely in the browser on the work PC, signs in with your Microsoft account, reads the same folders and list, and does its AI work with open models from Hugging Face running locally in the browser. Hugging Face supplies model files and hosts the app's code; it never receives an email, a photo, a spreadsheet or the SOR list.</span>
+    <span>Python on a Hugging Face Space, cloud AI services and off-the-shelf job software are all set aside: each one means a new company holding tenant data on servers outside the UK, and Sanctuary's own supplier terms require their prior written consent for any such company. The comparison on the artboard beside this document sets out the four routes side by side.</span>
   </div>
 
   <!-- 3 -->
   <div style="display: flex; flex-direction: column; gap: 10px;">
     <span style="font-size: 18px; font-weight: 600;">3. Your data rule, applied</span>
     <span>"Local" in this design means two places: the work PC itself (including inside its browser), and your own Microsoft 365 tenant, which already holds the mailbox today. Microsoft is your existing processor; nothing new is added to that list. The only outbound connections the app makes are to your own Microsoft 365 and, once, to download model files from Hugging Face. Model downloads carry no data outwards. If IT would rather not allow huggingface.co at all, the model files can be copied into your SharePoint once and loaded from there.</span>
+    <span>Two things in Sanctuary's own paperwork make this more than a preference. Their standard purchase terms treat R Dunham as a processor of Sanctuary's personal data, so any other company that can see that data is a sub-processor and needs Sanctuary's prior written consent, with equivalent terms flowed down and a 48-hour breach-notice clause. And their 2026 Supplier Code of Conduct bans putting Sanctuary data into publicly accessible AI tools, naming OpenAI and other generative AI platforms. Keeping everything on the PC and inside the tenant is the one route that needs neither a consent request nor an international transfer agreement. A short data protection impact assessment is still worth writing, because AI combined with tenant data is on the ICO's mandatory list; inside the tenant it is a light one.</span>
+    <span>One more licence to respect: the SOR schedule in the template is copyright M3 Housing, licensed to Sanctuary and sub-licensed to you, and its terms say electronic SOR data must not be passed to unauthorised service providers. So the app reads the code list from the template in your own SharePoint at run time and never embeds it or uploads it anywhere.</span>
     <div style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 10px; background: #f4f3f0; font-size: 13px;">
       <span style="font-weight: 600;">Outside the line, and why</span>
-      <span>• Hugging Face Spaces running Python: the Space would hold the data on Hugging Face's US servers. Since July 2026 a Python Space also needs a paid plan, and free hardware sleeps after 48 hours.</span>
-      <span>• Cloud AI services (Claude, ChatGPT, Gemini, Copilot pay-as-you-go agents): the text and photos go to the provider.</span>
-      <span>• Job-management products and email-to-board tools (Joblogic, simPRO, Airtable, Trello and similar): a new processor, and none of them produce Sanctuary's exact template.</span>
-      <span>• Azure services in your own subscription (for example a private AI model in the UK South region): still Microsoft, still under your agreement, but a new service. Kept as route C for later, and only if you and IT judge it in-house.</span>
+      <span>• Hugging Face Spaces running Python: the Space would hold the data on Hugging Face's US servers (only their Team and Enterprise plans can pick an EU region). Since July 2026 a Python Space also needs a paid plan, and free hardware sleeps after 48 hours.</span>
+      <span>• Cloud AI services (Claude, ChatGPT, Gemini, Copilot pay-as-you-go agents): the text and photos go to the provider, and Sanctuary's code of conduct forbids it.</span>
+      <span>• Job-management products and email-to-board tools (Joblogic, simPRO, Airtable, Trello, Zapier and similar): a new processor, and none of them produce Sanctuary's exact template. Joblogic is the only mainstream one with SOR support, and only on its enterprise tier.</span>
+      <span>• Azure services in your own subscription (for example a private AI model in the UK South region): still Microsoft, still under your agreement, but a new processing activity that Sanctuary's terms ask you to notify. Kept as route C for later, and only if you and IT judge it in-house.</span>
     </div>
   </div>
 
@@ -58,11 +60,11 @@
     <span style="font-size: 18px; font-weight: 600;">4. Layer A: filing and the board, inside Microsoft 365 (weeks 1–2)</span>
     <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 4px;">
       <span><span style="font-weight: 600;">A1. One SharePoint site for Sanctuary quotes.</span> A document library where every job is a folder named by work order and address, for example <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px;">SANC004958 – 31 Cathedral Drive SS15 5WF</span>. Inside: the emails saved as files, the photos, the report, and the finished quote.</span>
-      <span><span style="font-weight: 600;">A2. A list called Quotes.</span> One row per job with the work order, PO, address, postcode, job description, total, and a Stage column with the four values. Shown as a Board view, which is Microsoft's own drag-and-drop kanban. Each row links to its folder.</span>
+      <span><span style="font-weight: 600;">A2. A list called Quotes.</span> One row per job with the work order, PO, address, postcode, job description, total, and a Stage column with the four values. Shown as a Board view, which is Microsoft's own drag-and-drop kanban. Each row links to its folder. If the board is too bare, a Power Apps form (also included in your licence) can sit over the same list.</span>
       <span><span style="font-weight: 600;">A3. The filing flow.</span> A Power Automate flow triggered by each new email in the shared mailbox. It looks for a Sanctuary work order number, then a known PO number, then a known address or postcode. If it finds one, it saves the email and every attachment into that job's folder and stamps them with the job details; if the job is new it creates the folder and the row. If it finds nothing, it files the email under "Needs a job" for a person to place. Emails stay in the mailbox untouched; the flow only copies.</span>
-      <span><span style="font-weight: 600;">A4. Filling the template.</span> An Office Script (a short script that runs inside Excel on the web) copies the pristine Sanctuary template into the job folder and writes only the header cells, the summary, the SOR codes and quantities, and the non-SOR lines. Because Excel saves the file, its formulas, dropdowns, hidden sheets and the SOR table stay exactly as Sanctuary supplied them.</span>
-      <span><span style="font-weight: 600;">A5. Marking sent.</span> Either the person drags the card to Sent, or a second small flow watches the mailbox's sent items for a message carrying the quote's filename and moves the card itself.</span>
-      <span><span style="font-weight: 600;">A6. AI in this layer.</span> Copilot Chat is already included in your licence and can summarise a report you paste into it, in Outlook or Teams, without any add-on. The heavy lifting in A is not AI at all: the work order and PO numbers, postcodes and addresses are fixed patterns, and matching on them is more reliable than any model.</span>
+      <span><span style="font-weight: 600;">A4. Filling the template.</span> An Office Script (a short script that runs inside Excel on the web) copies the pristine Sanctuary template into the job folder and writes only the header cells, the summary, the SOR codes and quantities, and the non-SOR lines, in one call. Because Excel saves the file, its formulas, dropdowns, hidden sheets and the SOR table stay exactly as Sanctuary supplied them.</span>
+      <span><span style="font-weight: 600;">A5. Marking sent.</span> Sanctuary's own procedure says extra works over £100 go on the template to their quotes mailbox. So either the person drags the card to Sent, or a second small flow watches for emails from the shared mailbox to that address carrying the quote's filename, and moves the card itself.</span>
+      <span><span style="font-weight: 600;">A6. AI in this layer.</span> Copilot Chat is already included in your licence and can summarise a report you paste into it, in Outlook or Teams, without any add-on. The heavy lifting in A is not AI at all: the work order and PO numbers, postcodes and addresses are fixed patterns, and matching on them is more reliable than any model. If you later want AI inside the flow itself, Microsoft's AI Builder prompts run in-region for UK tenants, but they make the flow premium and meter per use; not needed to start.</span>
     </div>
   </div>
 
@@ -74,29 +76,29 @@
       <span style="font-weight: 600;">Quote board</span><span>The Quotes list, drawn as four lanes. Dragging a card changes its Stage; the folder follows. Spring animation on lift and drop, cards settle into place, totals count up.</span>
       <span style="font-weight: 600;">Shared inbox</span><span>The mailbox as the flow sees it: what was found in each email and where it went. This is also where a person places the ones the rules could not.</span>
       <span style="font-weight: 600;">Job pack</span><span>One click on a card. The details the rules found (each with its source), the emails in date order, the engineer's report ready to become the Summary of Works, the photos with tick boxes, and likely SOR codes matched from the report wording.</span>
-      <span style="font-weight: 600;">Quote builder</span><span>Sanctuary's header fields, the summary, an SOR search over the 3,581 codes from their own template, live totals with your −7.5% adjustment and the under-£20k test, a checklist, and Export, which writes the template and moves the card to Ready to send.</span>
+      <span style="font-weight: 600;">Quote builder</span><span>Sanctuary's header fields, the summary, an SOR search over the 3,581 codes read from their own template, live totals with your −7.5% adjustment and the under-£20k test, a checklist, and Export, which writes the template and moves the card to Ready to send.</span>
     </div>
     <span style="font-weight: 600;">The AI, honestly.</span>
     <span>Small open models can run inside a modern browser (Edge or Chrome) on an ordinary office PC through a library called Transformers.js, which loads model files from Hugging Face once and keeps them in the browser's cache. They do not send anything anywhere. What they are good for here, and what they are not:</span>
     <div style="display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) 110px; gap: 0; border: 1px solid #e2e0da; border-radius: 10px; overflow: hidden; font-size: 13px;">
       <span style="padding: 8px 12px; background: #f4f3f0; font-weight: 600;">Task</span><span style="padding: 8px 12px; background: #f4f3f0; font-weight: 600;">How it is done</span><span style="padding: 8px 12px; background: #f4f3f0; font-weight: 600;">Confidence</span>
-      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Find work order, PO, address, postcode, dates</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Fixed patterns, no AI. SANC + 6 digits, 10-digit PO, UK postcode shape.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #1f5f3a; font-weight: 500;">High</span>
-      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Suggest SOR codes from the report</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">A small text-embedding model (about 30 MB) indexes the code descriptions once; the report is searched against them. Good at "rollers and channels" → 345613.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #1f5f3a; font-weight: 500;">High</span>
+      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Find work order, PO, address, postcode, dates</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Fixed patterns, no AI. SANC + 6 digits, 10-digit PO, UK postcode shape. Every value must appear word for word in an email before it is accepted.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #1f5f3a; font-weight: 500;">High</span>
+      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Suggest SOR codes from the report</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Plain word matching over the code descriptions first (exact terms like "up and over"), then a small text-embedding model (about 30 MB) for paraphrases. Top few shown with the words that matched.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #1f5f3a; font-weight: 500;">High</span>
       <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Turn the engineer's email into the Summary of Works</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Mostly copied verbatim with the greeting and sign-off stripped. A small local language model can tidy the wording if wanted. Always shown for editing.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #1f5f3a; font-weight: 500;">High</span>
       <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Spot missing details, guess type of works and urgency</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Keyword rules plus a small local model. Shown as "suggested" until confirmed.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #7a4f0e; font-weight: 500;">Medium</span>
-      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Describe or sort photos (before and after, damage type)</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Possible with small vision models in the browser, but slow on office hardware and rough in quality. Left to a later phase, or to route C.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #8a2f2a; font-weight: 500;">Low for now</span>
+      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Describe or sort photos (before and after, damage type)</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Possible with small vision models in the browser, but slow on office hardware and rough in quality. Interior photos can show people, post or medication, so photo AI stays on the PC or does not happen. Left to a later phase, or to route C.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #8a2f2a; font-weight: 500;">Low for now</span>
     </div>
-    <span>Every suggestion in the app shows where it came from, and nothing is filed or priced on a guess. The first time a PC opens the app it downloads the models (tens to a few hundred megabytes, once); after that they load from the browser's cache.</span>
-    <span><span style="font-weight: 600;">Hosting and sign-in.</span> The app is a handful of static files. Simplest is to put them in your SharePoint site; the alternative is a free static page on Hugging Face, which holds code only. Either way the app needs an "app registration" in your Microsoft tenant so it can sign users in and read the shared mailbox and SharePoint on their behalf. Those are standard delegated permissions; the person must already have access to the shared mailbox.</span>
+    <span>Every suggestion in the app shows where it came from, and nothing is filed or priced on a guess. The first time a PC opens the app it downloads the models (tens to a few hundred megabytes, once); after that they load from the browser's cache. How well they run on your particular PCs is the one part of Layer B that needs a hands-on trial before committing.</span>
+    <span><span style="font-weight: 600;">Hosting and sign-in.</span> The app is a handful of static files, but SharePoint cannot host them directly: custom scripts are blocked on modern sites, and the supported route needs an admin-approved package. The practical homes are a free static page on Hugging Face (code only, never data; about £7 a month for a paid plan if the source code itself must be private) or Cloudflare Pages. Either way the app needs an app registration in your Microsoft tenant so it can sign users in and read the shared mailbox and SharePoint on their behalf. Those are standard delegated permissions that do not need admin consent by default, though your tenant's settings may require it; the person must already have access to the shared mailbox. Expect to sign in about once a day.</span>
   </div>
 
   <!-- 6 -->
   <div style="display: flex; flex-direction: column; gap: 10px;">
     <span style="font-size: 18px; font-weight: 600;">6. Filling Sanctuary's template without breaking it</span>
-    <span>Your template leans on things that ordinary spreadsheet libraries quietly drop when they re-save a file: the dropdowns that use INDIRECT, the structured tables, the hidden filter sheets. Opening your example with a common Python library already warns that it will remove a data-validation extension. So the rule is: never re-save the template through a library. Two safe ways remain, and the design uses one in each layer.</span>
+    <span>Your template leans on things that ordinary spreadsheet libraries quietly drop when they re-save a file: the dropdowns that use INDIRECT, the structured tables, the hidden filter sheets. Opening your example with a common Python library already warns that it will remove a data-validation extension, and the two usual browser libraries (SheetJS community edition and ExcelJS) are documented to lose data validations or tables on a round trip. So the rule is: never re-save the template through a library.</span>
     <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
-      <span>• <span style="font-weight: 600;">Let Excel do the saving.</span> An Office Script writes cell values inside Excel on the web; Excel saves the workbook, so every feature survives. Used in Layer A.</span>
-      <span>• <span style="font-weight: 600;">Edit only the cell values inside the file.</span> An .xlsx is a zip of XML files; the app changes the handful of cells it fills and leaves every other byte alone. Used in Layer B, in the browser.</span>
+      <span>• <span style="font-weight: 600;">Let Excel do the saving, in both layers.</span> In Layer A an Office Script writes the cell values inside Excel on the web. In Layer B the app copies the template into the job folder and writes the cells through Microsoft's Excel API, which Excel Online then recalculates and saves. Nothing re-serialises the file, so every feature survives by construction.</span>
+      <span>• <span style="font-weight: 600;">Fallback: edit only the cell values inside the file.</span> An .xlsx is a zip of XML files; the app can change the handful of cells it fills and leave every other byte alone, with one drawback: totals show stale until Excel recalculates on opening.</span>
       <span>• Either way the master template is kept read-only and versioned, so when Sanctuary issue V1.1 you swap it once.</span>
       <span>• The filename follows the pattern in your example: <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px;">{ref}-{PO}_{work order}_{address}_{job}_{postcode}.xlsx</span>. What the leading reference is (yours or theirs) is one of the questions below.</span>
     </div>
@@ -119,9 +121,9 @@
     <span style="font-size: 18px; font-weight: 600;">8. Costs and licences</span>
     <div style="display: grid; grid-template-columns: minmax(0, 1.3fr) 150px minmax(0, 1.4fr); gap: 0; border: 1px solid #e2e0da; border-radius: 10px; overflow: hidden; font-size: 13px;">
       <span style="padding: 8px 12px; background: #f4f3f0; font-weight: 600;">Item</span><span style="padding: 8px 12px; background: #f4f3f0; font-weight: 600;">Cost</span><span style="padding: 8px 12px; background: #f4f3f0; font-weight: 600;">Note</span>
-      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Power Automate flow, SharePoint, Lists, Office Scripts, Copilot Chat</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£0 extra</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Included with Microsoft 365 Business Basic, Standard and Premium; the shared-mailbox trigger and SharePoint actions are standard connectors.</span>
-      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Power Automate Premium for the flow owner</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£11.50 a month</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Only if the flow ever hits the included daily limits (6,000 actions a day, 200 MB of content). Unlikely at this scale.</span>
-      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Layer B app hosting</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£0</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Static files on SharePoint, or a free static Hugging Face page. No server to run.</span>
+      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Power Automate flow, SharePoint, Lists, Power Apps, Office Scripts, Copilot Chat</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£0 extra</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Included with Microsoft 365 Business Basic, Standard and Premium; the shared-mailbox trigger and SharePoint actions are standard connectors.</span>
+      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Power Automate Premium for the flow owner</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£11.50 a month</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Only if the flow ever hits the included daily limits (6,000 actions a day, 200 MB of content), or if AI Builder prompts are added to it. Unlikely at this scale.</span>
+      <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Layer B app hosting</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£0, or about £7 a month</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Free static page on Hugging Face or Cloudflare Pages. The paid Hugging Face plan (US$9) only if the source code must be hidden. No server to run.</span>
       <span style="padding: 8px 12px; border-top: 1px solid #efede8;">AI models in the browser</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£0</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Open models under permissive licences, run on the PC.</span>
       <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Microsoft 365 Copilot seat (optional)</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">about £23 a month</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Only if you want Copilot working across the job folders on its own. Not required by this design.</span>
       <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Route C server (only if needed later)</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">£20–60 a month or one-off hardware</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">A small machine you own for larger models and photo understanding.</span>
@@ -135,46 +137,60 @@
     <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
       <span>• Full Access to the shared mailbox for the account that will own the filing flow (ideally a dedicated licensed account rather than a named person, so it survives staff changes).</span>
       <span>• Confirmation that Power Automate, Office Scripts and Excel on the web are allowed on the work PCs (some Conditional Access settings block them).</span>
-      <span>• A SharePoint site, or permission to create one.</span>
-      <span>• For Layer B: an app registration in Entra ID with delegated permissions to read the shared mailbox and read and write the SharePoint site, and admin consent for it.</span>
+      <span>• A SharePoint site, or permission to create one, with audit logging on.</span>
+      <span>• For Layer B: an app registration in Entra ID with delegated permissions to read the shared mailbox and read and write the SharePoint site, and consent for it under your tenant's policy.</span>
       <span>• Either allow huggingface.co for one-off model downloads, or agree to hold the model files in SharePoint.</span>
+      <span>• Evidence of Cyber Essentials, which Sanctuary's terms expect of suppliers that process their data.</span>
     </div>
   </div>
 
   <!-- 10 -->
   <div style="display: flex; flex-direction: column; gap: 10px;">
-    <span style="font-size: 18px; font-weight: 600;">10. Decisions for you</span>
+    <span style="font-size: 18px; font-weight: 600;">10. Paperwork before any build</span>
     <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
-      <span>1. Is Layer A alone enough for now, with B to follow, or should both be planned together from the start?</span>
-      <span>2. Does the automatic filing copy every email in the shared mailbox, or only ones that look like Sanctuary jobs?</span>
-      <span>3. Should "Sent" be set by dragging the card, or detected from sent items?</span>
-      <span>4. Where should the app's code live: your SharePoint, or a free Hugging Face static page?</span>
-      <span>5. Do services in your own Azure subscription count as in-house? This only matters if route C is ever wanted.</span>
-      <span>6. Who checks a quote before it goes out, and should the app insist on a second person?</span>
+      <span>1. Check which contract actually governs the Sanctuary work (their standard terms or a framework) and whether a Data Processing Particulars Form exists; Microsoft should be listed on it as your processor.</span>
+      <span>2. Write a short data protection impact assessment covering the archive and the AI step, using the ICO template. Inside the tenant it is a light one.</span>
+      <span>3. Tell Sanctuary about the change in process. Their terms ask suppliers to notify technology changes that may affect security, and this one improves it.</span>
+      <span>4. Agree a retention period for the job folders with Sanctuary, and set it on the library.</span>
+      <span>5. If route C (Azure) is ever chosen, that becomes a formal sign-off request to Sanctuary's data protection office rather than a notice.</span>
     </div>
   </div>
 
   <!-- 11 -->
   <div style="display: flex; flex-direction: column; gap: 10px;">
-    <span style="font-size: 18px; font-weight: 600;">11. Questions about your emails</span>
+    <span style="font-size: 18px; font-weight: 600;">11. Decisions for you</span>
+    <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
+      <span>1. Is Layer A alone enough for now, with B to follow, or should both be planned together from the start?</span>
+      <span>2. Does the automatic filing copy every email in the shared mailbox, or only ones that look like Sanctuary jobs?</span>
+      <span>3. Should "Sent" be set by dragging the card, or detected from emails to Sanctuary's quotes mailbox?</span>
+      <span>4. Where should the app's code live: a free public Hugging Face page (code only), a private one on the paid plan, or Cloudflare Pages?</span>
+      <span>5. Do services in your own Azure subscription count as in-house? This only matters if route C is ever wanted.</span>
+      <span>6. Who checks a quote before it goes out, and should the app insist on a second person?</span>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 18px; font-weight: 600;">12. Questions about your emails and set-up</span>
     <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
       <span>• How reliably does the SANC number appear in Sanctuary's emails and in your engineers' reports, and where (subject, body, attachment name)?</span>
       <span>• What is the leading reference in the filename (123b27db in your example): yours, Sanctuary's, or generated?</span>
       <span>• Roughly how many job emails and photos arrive a week, and how large are the photos?</span>
       <span>• Do you reply from the shared mailbox, or from personal accounts?</span>
       <span>• Are there other clients with their own templates, or is Sanctuary the only one for now?</span>
+      <span>• Do you already hold Cyber Essentials?</span>
     </div>
   </div>
 
-  <!-- 12 -->
+  <!-- 13 -->
   <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 10px; border: 1px solid #e3c98f; background: #fdf3e0;">
     <span style="font-size: 15px; font-weight: 600;">What was checked, and what was not</span>
-    <span style="font-size: 13px;">The Microsoft 365 facts (which connectors are included, licence limits, Office Scripts behaviour, shared-mailbox permissions, UK prices) and the Hugging Face facts (paid plans for Python Spaces, sleeping, US hosting) were checked against the official documentation on 10 September 2026. The in-browser AI approach, the template-filling method and the data-protection reading are my professional judgement from experience and have not yet been through the same source-checking pass, because the account's usage limit interrupted it. I would verify those before any build starts.</span>
+    <span style="font-size: 13px;">Checked against official sources on 10 September 2026: the Microsoft 365 facts (connectors, licence limits, Office Scripts, shared-mailbox permissions, UK prices); Hugging Face plans, regions and hosting; the browser-app route (sign-in, mailbox and file access, the Excel API, which libraries break the template); Sanctuary's published purchase terms, supplier code of conduct and extra-works procedure, the M3 SOR licence terms, and ICO guidance on transfers and AI; and the off-the-shelf tools named in section 3. Not yet checked hands-on: how well small models run in the browser on your particular PCs, and the practicalities of route C. The ranking of the four routes is my judgement; the independent review I intended to run on it was cut short by the account's usage limit.</span>
   </div>
 
-  <!-- 13 -->
+  <!-- 14 -->
   <div style="display: flex; flex-direction: column; gap: 10px;">
-    <span style="font-size: 18px; font-weight: 600;">12. Suggested next step</span>
+    <span style="font-size: 18px; font-weight: 600;">13. Suggested next step</span>
     <span>If the screens on page 1 match the vision, the natural next piece is a clickable prototype of the board and job pack, running on made-up data, so the drag and drop and the flow between screens can be felt before anything is connected to the mailbox. In parallel, IT can grant the mailbox access and the Layer A flow can be set up against the real inbox, which is useful on its own within a fortnight.</span>
   </div>
 
