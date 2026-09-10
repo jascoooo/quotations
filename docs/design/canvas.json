@@ -8,8 +8,8 @@
     { "file": "JobPack.dc.html", "title": "3 · Job pack (one click on a card)", "x": 1560, "y": 0, "w": 1440, "h": 1080, "page": "screens" },
     { "file": "Inbox.dc.html", "title": "2 · Shared inbox, emails finding their job", "x": 0, "y": 1080, "w": 1440, "h": 900, "page": "screens" },
     { "file": "QuoteBuilder.dc.html", "title": "4 · Quote builder and export", "x": 1560, "y": 1260, "w": 1440, "h": 1480, "page": "screens" },
-    { "file": "Flow.dc.html", "title": "How it fits together", "x": 0, "y": 0, "w": 1440, "h": 720, "page": "approach" },
-    { "file": "Options.dc.html", "title": "Four ways to get there", "x": 0, "y": 860, "w": 1440, "h": 780, "page": "approach" },
+    { "file": "Flow.dc.html", "title": "How it fits together", "x": 0, "y": 0, "w": 1440, "h": 840, "page": "approach" },
+    { "file": "Options.dc.html", "title": "Four ways to get there", "x": 0, "y": 980, "w": 1440, "h": 780, "page": "approach" },
     { "file": "Proposal.dc.html", "title": "Written proposal", "x": 1560, "y": 0, "w": 900, "h": 4700, "page": "approach", "print": "flow" }
   ],
   "annotations": [
