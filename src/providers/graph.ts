@@ -9,6 +9,7 @@
 
 import { PublicClientApplication, InteractionRequiredAuthError, type AccountInfo } from '@azure/msal-browser';
 import { draftJobFromEmail } from '../lib/match';
+import { priceQuote } from '../lib/pricing';
 import { buildCellMap, buildQuoteFileName, shortRef, type CellWrite } from '../lib/template';
 import type { Email, Job, MatchRule, Photo, Quote, RateAdjustment, SorCode, Stage, User } from '../lib/types';
 import { applyEmailToJob, autoFile } from './autofile';
@@ -16,6 +17,8 @@ import type { AppConfig } from './config';
 import type { ChangeEvent, DataProvider, ExportResult, LiveStatus, ProviderSettings } from './types';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
+// Delegated scopes. Sites.ReadWrite.All is broad; ask IT whether the tenant can grant the app
+// Sites.Selected for just the quotes site instead (then list/drive calls stay the same).
 const SCOPES = ['User.Read', 'Mail.Read.Shared', 'Sites.ReadWrite.All', 'Files.ReadWrite.All'];
 
 interface ListItem<F> {
@@ -562,7 +565,23 @@ export class GraphProvider implements DataProvider {
       const failed = r.responses.filter((x) => x.status >= 400);
       if (failed.length) throw new Error(`Some cells could not be written: ${JSON.stringify(failed.slice(0, 3))}`);
     }
+    // 3. Read the sheet's own totals back and refuse to call it ready if they disagree with ours.
+    const readBack = async (sheet: string, address: string) => {
+      const r = await this.graph<{ values: (number | string | null)[][] }>(
+        `/drives/${this.cfg.driveId}/items/${item.id}/workbook/worksheets('${sheet}')/range(address='${address}')?$select=values`,
+        {},
+        { 'workbook-session-id': sid },
+      );
+      return Number(r.values?.[0]?.[0] ?? NaN);
+    };
+    const sheetTotals = { main: await readBack('Main Sheet', 'AV65'), continuation: await readBack('Continuation Sheet', 'AV55'), nonSor: await readBack('Non SOR Works', 'AV55'), total: await readBack('Main Sheet', 'BN15') };
     await this.graph(`/drives/${this.cfg.driveId}/items/${item.id}/workbook/closeSession`, { method: 'POST' }, { 'workbook-session-id': sid });
+    const ours = priceQuote(q.sorLines, q.nonSorLines, new Map((await this.getSorCodes()).map((c) => [c.code, c])), await this.getRates(), q.contractor);
+    const differs = Math.abs(sheetTotals.total - ours.total) > 0.011;
+    if (differs) {
+      await this.updateJob({ ...job, quoteFileName: fileName, flag: { kind: 'internal-check', text: `Sheet total ${sheetTotals.total.toFixed(2)} differs from the app's ${ours.total.toFixed(2)}. Check the workbook before sending.` } });
+      return { fileName, webUrl: item.webUrl, writes, sheetTotals, mismatch: true };
+    }
 
     await this.updateJob({
       ...job,
@@ -571,7 +590,7 @@ export class GraphProvider implements DataProvider {
       stage: job.stage === 'review' || job.stage === 'amend' ? 'ready' : job.stage,
       flag: { kind: 'checked', text: 'Exported, awaiting a second check' },
     });
-    return { fileName, webUrl: item.webUrl, writes };
+    return { fileName, webUrl: item.webUrl, writes, sheetTotals, mismatch: false };
   }
 
   /** The SOR list, read from the client's own template inside the tenant. Never stored outside it. */

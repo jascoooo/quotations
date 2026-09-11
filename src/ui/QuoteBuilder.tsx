@@ -302,7 +302,16 @@ export function QuoteBuilder({ job, sor, rates, settings, mode, onBack, onSave, 
                 <Icon.sheet /> Open in Excel
               </a>
             )}
-            {mode === 'demo' && <div className="note">Demo mode has no template to write into. In Microsoft 365 mode these {result.writes.length} cells are written into a fresh copy of the client's template in the job folder.</div>}
+            {mode === 'demo' && <div className="note">Demo mode has no template to write into. In Microsoft 365 mode these {result.writes.length} cells are written into a fresh copy of the client's template in the job folder, and the sheet's own totals are read back and compared with the app's before the card moves on.</div>}
+            {result.sheetTotals && (
+              <div className={`note ${result.mismatch ? 'danger' : ''}`}>
+                {result.mismatch ? <Icon.info size={14} /> : <Icon.check size={14} />}
+                <span>
+                  The saved sheet says {gbp(result.sheetTotals.total)} (main {gbp(result.sheetTotals.main)}, continuation {gbp(result.sheetTotals.continuation)}, non-SOR {gbp(result.sheetTotals.nonSor)}); the app says {gbp(totals.total)}.
+                  {result.mismatch ? ' They differ, so the card has not moved to Ready to send. Open the workbook and check.' : ' They agree.'}
+                </span>
+              </div>
+            )}
             <div className="kv">
               {result.writes.map((w, i) => (
                 <div key={i} style={{ display: 'contents' }}>

@@ -6,7 +6,7 @@ Everything the app touches lives in your own tenant. This page lists what IT nee
 
 - New registration, **single tenant** ("Accounts in this organizational directory only").
 - Platform: **Single-page application**. Redirect URI: the https address where the app is hosted (for example `https://<name>.hf.space/` or your Cloudflare Pages URL). No client secret.
-- API permissions (Microsoft Graph, **delegated**): `User.Read`, `Mail.Read.Shared`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`. Grant admin consent if the tenant's user-consent policy requires it.
+- API permissions (Microsoft Graph, **delegated**): `User.Read`, `Mail.Read.Shared`, `Sites.ReadWrite.All`, `Files.ReadWrite.All`. Grant admin consent if the tenant's user-consent policy requires it. If the tenant supports it, ask for `Sites.Selected` scoped to the quotes site instead of `Sites.ReadWrite.All`.
 - Optional, to send finished quotes from the app later: `Mail.Send.Shared`.
 - Note the **Application (client) ID** and **Directory (tenant) ID** for `config.json`.
 
@@ -15,6 +15,8 @@ Users sign in about once a day (single-page-app refresh tokens last 24 hours).
 ## 2. Shared mailbox
 
 Each person who will use the app needs **Full Access** to the shared mailbox in Exchange. The app reads the mailbox's Inbox through Graph as that person; it never signs in as the mailbox and never moves or deletes anything in it.
+
+If quotes are sent *as* the shared mailbox and you want "Sent" detected automatically later, switch on the mailbox's "message copy for Send As" setting (`Set-Mailbox -MessageCopyForSentAsEnabled $true`), otherwise the sent copy only lands in the sender's own Sent Items.
 
 ## 3. SharePoint site
 
@@ -74,10 +76,11 @@ Copy `public/config.example.json` to `config.json` next to the built `index.html
 
 ## 5. Hosting
 
-The app is static files (`npm run build` → `dist/`). SharePoint cannot serve them as a page, so use one of:
+The app is static files (`npm run build` → `dist/`). SharePoint cannot serve them as a page, so use one of, in order of preference:
 
-- **Hugging Face static Space** (free): `sdk: static`, `app_build_command: npm ci && npm run build`, `app_file: dist/index.html`. Public visibility shows the source code (no data, no secrets); Protected visibility hides it on a paid plan. Only the app's code is on Hugging Face. Emails, photos and quotes never go there.
-- **Cloudflare Pages** or **Azure Static Web Apps**: also fine; set the redirect URI to match.
+- **Azure Static Web Apps, free tier, in the company's own Azure subscription.** In-tenant and Entra-authenticated, so the code that holds the user's sign-in is never served by a third party. About £0.
+- **Hugging Face static Space** (free): `sdk: static`, `app_build_command: npm ci && npm run build`, `app_file: dist/index.html`. Public visibility shows the source code (no data, no secrets); Protected visibility hides it on a paid plan. Only the app's code is on Hugging Face; emails, photos and quotes never go there. Use this only if an Azure subscription is not an option.
+- **Cloudflare Pages**: also fine; set the redirect URI to match.
 
 Corporate web filtering must allow `login.microsoftonline.com`, `graph.microsoft.com` and the host you choose. If in-browser AI models are added later, `huggingface.co` and its download hosts (`*.hf.co`) are needed for the one-off model download.
 
@@ -87,6 +90,7 @@ The app files emails while someone has it open. For filing overnight and at week
 
 ## 7. Before go-live
 
+- After the first real export, open the workbook: the app reads the sheet's own totals back and compares them with its own, and will not move the card to "Ready to send" if they differ.
 - Data protection impact assessment (light, in-tenant) and a note to the client about the change in process, per `docs/proposal.md` section 10.
 - Retention set on the library.
 - Audit logging on the site.

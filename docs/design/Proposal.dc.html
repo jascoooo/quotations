@@ -13,7 +13,7 @@
     a { color: #2f5d8a; } a:hover { color: #244a70; }
   </style>
 </helmet>
-<div style="width: 900px; min-height: 4700px; background: #ffffff; padding: 56px 72px 72px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px; font-size: 14px; line-height: 1.55; color: #1c1b18;">
+<div style="width: 900px; min-height: 5700px; background: #ffffff; padding: 56px 72px 72px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px; font-size: 14px; line-height: 1.55; color: #1c1b18;">
 
   <div style="display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; border-bottom: 2px solid #1c1b18;">
     <span style="font-size: 12px; color: #6b6963; letter-spacing: 0.04em; text-transform: uppercase;">Proposal · 10 September 2026 · draft for discussion</span>
@@ -63,7 +63,7 @@
       <span><span style="font-weight: 600;">A2. A list called Quotes.</span> One row per job with the work order, PO, address, postcode, job description, total, and a Stage column with the four values. Shown as a Board view, which is Microsoft's own drag-and-drop kanban. Each row links to its folder. If the board is too bare, a Power Apps form (also included in your licence) can sit over the same list.</span>
       <span><span style="font-weight: 600;">A3. The filing flow.</span> A Power Automate flow triggered by each new email in the shared mailbox. It looks for a Sanctuary work order number, then a known PO number, then a known address or postcode. If it finds one, it saves the email and every attachment into that job's folder and stamps them with the job details; if the job is new it creates the folder and the row. If it finds nothing, it files the email under "Needs a job" for a person to place. Emails stay in the mailbox untouched; the flow only copies.</span>
       <span><span style="font-weight: 600;">A4. Filling the template.</span> An Office Script (a short script that runs inside Excel on the web) copies the pristine Sanctuary template into the job folder and writes only the header cells, the summary, the SOR codes and quantities, and the non-SOR lines, in one call. Because Excel saves the file, its formulas, dropdowns, hidden sheets and the SOR table stay exactly as Sanctuary supplied them.</span>
-      <span><span style="font-weight: 600;">A5. Marking sent.</span> Sanctuary's own procedure says extra works over £100 go on the template to their quotes mailbox. So either the person drags the card to Sent, or a second small flow watches for emails from the shared mailbox to that address carrying the quote's filename, and moves the card itself.</span>
+      <span><span style="font-weight: 600;">A5. Marking sent.</span> Sanctuary's own procedure says extra works over £100 go on the template to their quotes mailbox. So either the person drags the card to Sent, or a second small flow watches for emails from the shared mailbox to that address carrying the quote's filename, and moves the card itself. One IT setting matters: when someone sends as the shared mailbox, Exchange keeps the sent copy in that person's own Sent Items unless the mailbox's "message copy for Send As" option is on.</span>
       <span><span style="font-weight: 600;">A6. AI in this layer.</span> Copilot Chat is already included in your licence and can summarise a report you paste into it, in Outlook or Teams, without any add-on. The heavy lifting in A is not AI at all: the work order and PO numbers, postcodes and addresses are fixed patterns, and matching on them is more reliable than any model. If you later want AI inside the flow itself, Microsoft's AI Builder prompts run in-region for UK tenants, but they make the flow premium and meter per use; not needed to start.</span>
     </div>
   </div>
@@ -89,7 +89,8 @@
       <span style="padding: 8px 12px; border-top: 1px solid #efede8;">Describe or sort photos (before and after, damage type)</span><span style="padding: 8px 12px; border-top: 1px solid #efede8;">Possible with small vision models in the browser, but slow on office hardware and rough in quality. Interior photos can show people, post or medication, so photo AI stays on the PC or does not happen. Left to a later phase, or to route C.</span><span style="padding: 8px 12px; border-top: 1px solid #efede8; color: #8a2f2a; font-weight: 500;">Low for now</span>
     </div>
     <span>Every suggestion in the app shows where it came from, and nothing is filed or priced on a guess. The first time a PC opens the app it downloads the models (tens to a few hundred megabytes, once); after that they load from the browser's cache. How well they run on your particular PCs is the one part of Layer B that needs a hands-on trial before committing.</span>
-    <span><span style="font-weight: 600;">Hosting and sign-in.</span> The app is a handful of static files, but SharePoint cannot host them directly: custom scripts are blocked on modern sites, and the supported route needs an admin-approved package. The practical homes are a free static page on Hugging Face (code only, never data; about £7 a month for a paid plan if the source code itself must be private) or Cloudflare Pages. Either way the app needs an app registration in your Microsoft tenant so it can sign users in and read the shared mailbox and SharePoint on their behalf. Those are standard delegated permissions that do not need admin consent by default, though your tenant's settings may require it; the person must already have access to the shared mailbox. Expect to sign in about once a day.</span>
+    <span><span style="font-weight: 600;">Hosting and sign-in.</span> The app is a handful of static files, but SharePoint cannot host them directly. The independent review (section 13) made a point I agree with: the app's code holds the user's sign-in while it runs, so it should be served from somewhere the company controls. First choice is therefore Azure Static Web Apps on the free tier in the company's own Azure subscription (in-tenant, Entra-authenticated, about £0); a free static page on Hugging Face (code only, never data) or Cloudflare Pages only if IT prefers not to open an Azure subscription. Either way the app needs an app registration in your Microsoft tenant so it can sign users in and read the shared mailbox and SharePoint on their behalf; ask IT whether the SharePoint permission can be scoped to the one quotes site. Expect to sign in about once a day.</span>
+    <span><span style="font-weight: 600;">What B does not do on its own.</span> Filing happens while someone has the app open. Overnight and at weekends nothing is filed until the next person opens it. That is why Layer A's flow is not optional in the long run: it files around the clock into the same lists and folders, and B simply shows the result.</span>
   </div>
 
   <!-- 6 -->
@@ -163,7 +164,7 @@
       <span>1. Is Layer A alone enough for now, with B to follow, or should both be planned together from the start?</span>
       <span>2. Does the automatic filing copy every email in the shared mailbox, or only ones that look like Sanctuary jobs?</span>
       <span>3. Should "Sent" be set by dragging the card, or detected from emails to Sanctuary's quotes mailbox?</span>
-      <span>4. Where should the app's code live: a free public Hugging Face page (code only), a private one on the paid plan, or Cloudflare Pages?</span>
+      <span>4. Where should the app's code live: the company's own Azure subscription (recommended by the review), a free public Hugging Face page (code only), or Cloudflare Pages? Does the company have, or want, an Azure subscription?</span>
       <span>5. Do services in your own Azure subscription count as in-house? This only matters if route C is ever wanted.</span>
       <span>6. Who checks a quote before it goes out, and should the app insist on a second person?</span>
     </div>
@@ -182,15 +183,29 @@
     </div>
   </div>
 
-  <!-- 13 -->
+  <!-- 13 review -->
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 18px; font-weight: 600;">13. Independent review of the routes</span>
+    <span>Three reviewers with different briefs (an IT and data-protection lead, the person who would use it daily, and a solutions architect) scored the four routes against the no-third-party rule. All three ranked the Microsoft-only route first (57 to 60 out of 70) and the browser-only route lowest (43 to 44), with the own-server hybrid and a Hugging Face-hosted variant in between. Their reasons, and what changed because of them:</span>
+    <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
+      <span>• <span style="font-weight: 600;">No background process in the browser app.</span> Emails are only filed while someone has it open. Accepted: Layer A's flow is the 24-hour filer and the app shows its results; both write to the same lists.</span>
+      <span>• <span style="font-weight: 600;">Code served from a third party while it holds the user's sign-in.</span> Accepted: host the app in the company's own Azure subscription first, keep Hugging Face as the fallback, scope the SharePoint permission to the one site.</span>
+      <span>• <span style="font-weight: 600;">Never send a broken spreadsheet.</span> After the template is filled, read the sheet's own totals back and refuse "ready to send" if they disagree with the app's. Built in.</span>
+      <span>• <span style="font-weight: 600;">Reports that arrive before the client's work order.</span> A provisional job keyed on the address, merged when the SANC email lands. Not built yet; on the list.</span>
+      <span>• <span style="font-weight: 600;">The SOR list's licence.</span> Confirm with Sanctuary or M3 before copying the codes into any list outside the template. The app reads them from the template at run time.</span>
+    </div>
+    <span>Of the fifteen factual claims the review set out to verify, four were checked before the account's usage limit stopped it: the shared-mailbox trigger is a standard connector (confirmed); filling the template inside Excel keeps its features (confirmed, with the note that Excel does the preserving); the priority flags are ordinary true/false cells (confirmed); and Office Scripts on a Business Basic licence should be checked with IT rather than assumed.</span>
+  </div>
+
+  <!-- 14 -->
   <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; border-radius: 10px; border: 1px solid #e3c98f; background: #fdf3e0;">
-    <span style="font-size: 15px; font-weight: 600;">What was checked, and what was not</span>
+    <span style="font-size: 15px; font-weight: 600;">14. What was checked, and what was not</span>
     <span style="font-size: 13px;">Checked against official sources on 10 September 2026: the Microsoft 365 facts (connectors, licence limits, Office Scripts, shared-mailbox permissions, UK prices); Hugging Face plans, regions and hosting; the browser-app route (sign-in, mailbox and file access, the Excel API, which libraries break the template); Sanctuary's published purchase terms, supplier code of conduct and extra-works procedure, the M3 SOR licence terms, and ICO guidance on transfers and AI; and the off-the-shelf tools named in section 3. Not yet checked hands-on: how well small models run in the browser on your particular PCs, and the practicalities of route C. The ranking of the four routes is my judgement; the independent review I intended to run on it was cut short by the account's usage limit.</span>
   </div>
 
   <!-- 14 -->
   <div style="display: flex; flex-direction: column; gap: 10px;">
-    <span style="font-size: 18px; font-weight: 600;">13. Suggested next step</span>
+    <span style="font-size: 18px; font-weight: 600;">15. Suggested next step</span>
     <span>If the screens on page 1 match the vision, the natural next piece is a clickable prototype of the board and job pack, running on made-up data, so the drag and drop and the flow between screens can be felt before anything is connected to the mailbox. In parallel, IT can grant the mailbox access and the Layer A flow can be set up against the real inbox, which is useful on its own within a fortnight.</span>
   </div>
 

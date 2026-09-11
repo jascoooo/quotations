@@ -13,6 +13,9 @@ export interface ExportResult {
   /** Web link to the saved workbook in the job folder (Microsoft 365 mode). */
   webUrl?: string;
   writes: CellWrite[];
+  /** Totals read back from the saved workbook (Microsoft 365 mode), so the sheet's own maths is checked against the app's. */
+  sheetTotals?: { main: number; continuation: number; nonSor: number; total: number };
+  mismatch?: boolean;
 }
 
 /**
