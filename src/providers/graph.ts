@@ -17,11 +17,13 @@ import type { AppConfig } from './config';
 import type { ChangeEvent, DataProvider, ExportResult, LiveStatus, ProviderSettings } from './types';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
-// Delegated scopes. Sites.ReadWrite.All is broad. The least-privilege form is delegated
-// Sites.Selected (admin consent + a 'write' grant on the one quotes site via
-// POST /sites/{id}/permissions); test the Excel workbook endpoints with it before
-// dropping Files.ReadWrite.All, since their docs only list Files.* scopes.
-const SCOPES = ['User.Read', 'Mail.Read.Shared', 'Sites.ReadWrite.All', 'Files.ReadWrite.All'];
+// Delegated scopes. Files.ReadWrite is the least-privileged scope Microsoft documents
+// for the drive and Excel workbook calls (Files.ReadWrite.All is not needed; fall back to
+// it only if a library call is refused). Sites.ReadWrite.All is broad: the least-privilege
+// form for the lists and library is delegated Sites.Selected (admin consent + a 'write'
+// grant on the one quotes site via POST /sites/{id}/permissions). The workbook endpoints
+// are not documented for any Selected scope, so keep Files.ReadWrite alongside it.
+const SCOPES = ['User.Read', 'Mail.Read.Shared', 'Sites.ReadWrite.All', 'Files.ReadWrite'];
 
 interface ListItem<F> {
   id: string;
