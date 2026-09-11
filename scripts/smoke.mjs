@@ -10,7 +10,7 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-await page.goto('http://localhost:4173/#demo', { waitUntil: 'networkidle' });
+await page.goto(process.env.BASE_URL ?? 'http://localhost:4173/#demo', { waitUntil: 'networkidle' });
 await page.waitForSelector('.board', { timeout: 15000 });
 await page.waitForTimeout(600);
 await page.screenshot({ path: `${OUT}/1-board.png` });
