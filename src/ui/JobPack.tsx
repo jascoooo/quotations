@@ -114,7 +114,7 @@ export function JobPack({ job, emails, sor, settings, provider, onBack, onUpdate
             </div>
           </div>
           <StagePill stage={full.stage} />
-          <div className="spacer" />
+          <div className="actions">
           {full.folderUrl && (
             <a className="btn" href={full.folderUrl} target="_blank" rel="noreferrer">
               <Icon.folder /> Open job folder
@@ -129,6 +129,7 @@ export function JobPack({ job, emails, sor, settings, provider, onBack, onUpdate
           <button className="btn primary" onClick={build}>
             {full.quote ? 'Open quote' : 'Build quote'} <Icon.arrow />
           </button>
+          </div>
         </div>
       </div>
 

@@ -99,14 +99,15 @@ export function QuoteBuilder({ job, sor, rates, settings, mode, onBack, onSave, 
           </div>
         </div>
         <StagePill stage={job.stage} />
-        <div className="spacer" />
-        <span className="small muted-2">{savedAt ? `Saved ${fmtDateTime(savedAt)}` : 'Not saved yet'}</span>
-        <button className="btn" onClick={onBack}>
-          <Icon.back /> Back to job pack
-        </button>
-        <button className="btn primary" disabled={!canExport || exporting} onClick={doExport} title={canExport ? '' : 'Finish the checks on the right first'}>
-          <Icon.sheet /> {exporting ? 'Writing…' : `Export ${settings.clientName} spreadsheet`}
-        </button>
+        <div className="actions">
+          <span className="small muted-2">{savedAt ? `Saved ${fmtDateTime(savedAt)}` : 'Not saved yet'}</span>
+          <button className="btn" onClick={onBack}>
+            <Icon.back /> Back to job pack
+          </button>
+          <button className="btn primary" disabled={!canExport || exporting} onClick={doExport} title={canExport ? '' : 'Finish the checks on the right first'}>
+            <Icon.sheet /> {exporting ? 'Writing…' : `Export ${settings.clientName} spreadsheet`}
+          </button>
+        </div>
       </div>
 
       <div className="content">
