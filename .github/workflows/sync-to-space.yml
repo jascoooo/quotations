@@ -1,34 +1,56 @@
-# Mirrors this repository to a Hugging Face static Space, which builds and serves
-# the app's code. Only code goes to Hugging Face: the app's data stays in the
-# company's Microsoft 365 tenant and in the user's browser.
+# Builds the app on GitHub and publishes ONLY the built files to a free Hugging Face
+# static Space. Hugging Face's own build step needs paid credits, so the build runs
+# here instead; the Space just serves the result. Only code goes to Hugging Face:
+# the app's data stays in the company's Microsoft 365 tenant and in the user's browser.
 #
 # One-off setup:
-#   1. Create a Space on huggingface.co (SDK: Static). Note its owner and name.
+#   1. Create a Space on huggingface.co (SDK: Static, leave it empty). Its address will
+#      be https://<owner>-<name>.static.hf.space/ (lower case, underscores become hyphens).
 #   2. Turn on two-factor sign-in for the Hugging Face account, then create a
 #      fine-grained token with write access to that one Space only.
 #   3. In this GitHub repository (Settings > Secrets and variables > Actions) add the
 #      secret HF_TOKEN and the variable HF_SPACE_ID (for example jakescott/quote-desk).
-#   4. Commit config.json (from public/config.example.json) into public/ on the
-#      branch you sync from. It holds ids and the shared mailbox address, no secrets,
-#      and is readable by anyone who has the Space's address whatever its visibility.
-#
-# The header at the top of README.md tells the Space how to build (npm ci && npm run
-# build, serving dist/index.html). The Space's own build runs on Node 22.
-# Keyless alternative: Hugging Face "Trusted Publishers" lets this workflow exchange
-# GitHub's OIDC token for a one-hour, one-Space token, so no HF_TOKEN is stored.
-name: Sync to Hugging Face Space
+#   4. Commit public/config.json (from public/config.example.json) on main. It holds ids
+#      and the shared mailbox address, no secrets, and is readable by anyone with the
+#      Space's address whatever its visibility.
+name: Build and publish to Hugging Face Space
 on:
   push:
     branches: [main]
   workflow_dispatch:
 jobs:
-  sync:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: huggingface/hub-sync@v0.3.0
+      - uses: actions/setup-node@v4
         with:
-          github_repo_id: ${{ github.repository }}
-          huggingface_repo_id: ${{ vars.HF_SPACE_ID }}
-          hf_token: ${{ secrets.HF_TOKEN }}
-          space_sdk: static
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Assemble the Space (built files plus a minimal Space README)
+        run: |
+          rm -rf space && mkdir space && cp -r dist/. space/
+          cat > space/README.md <<'MD'
+          ---
+          title: Quote Desk
+          emoji: 🗂️
+          colorFrom: blue
+          colorTo: gray
+          sdk: static
+          app_file: index.html
+          pinned: false
+          ---
+          Built files only. Source and setup notes: the GitHub repository. Nothing but
+          code lives here; the app's data stays in the company's Microsoft 365 tenant.
+          MD
+      - name: Upload to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SPACE: ${{ vars.HF_SPACE_ID }}
+        run: |
+          pip install -q -U "huggingface_hub[cli]"
+          hf repos create "$SPACE" --repo-type space --space-sdk static --exist-ok || true
+          hf upload "$SPACE" space . --repo-type space --delete "*" --commit-message "Publish ${GITHUB_SHA::7}"

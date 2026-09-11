@@ -1,14 +1,3 @@
----
-title: Quote Desk
-emoji: 📋
-colorFrom: blue
-colorTo: gray
-sdk: static
-app_build_command: npm ci && npm run build
-app_file: dist/index.html
-pinned: false
----
-
 # Quote Desk
 
 A quote archive and builder for Sanctuary extra-works requests: a shared, live board for everyone in the tenant, a job pack compiled from the shared mailbox, a quote builder that prices with the client's SOR codes, and an export that fills the client's own Excel template without breaking it.
@@ -43,4 +32,4 @@ See `docs/m365-setup.md`: an Entra app registration, a SharePoint site with two 
 
 ## Deploy
 
-The header at the top of this file, plus `.github/workflows/sync-to-space.yml`, mirror the repository to a free Hugging Face static Space, which builds and serves the app's code. Only code goes there. Setup steps are in `docs/m365-setup.md` section 5. Node 22.12 or newer is required to build (`.nvmrc`).
+`.github/workflows/sync-to-space.yml` builds the app on GitHub (Node 22) and publishes only the built files to a free Hugging Face static Space, which serves them at `https://<owner>-<name>.static.hf.space/`. Hugging Face's own build step is not free, so nothing is built there. Only code goes to Hugging Face. Setup steps are in `docs/m365-setup.md` section 5. Node 22.12 or newer is required to build locally (`.nvmrc`).
