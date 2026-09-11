@@ -4,12 +4,18 @@
 #
 # One-off setup:
 #   1. Create a Space on huggingface.co (SDK: Static). Note its owner and name.
-#   2. Create a fine-grained Hugging Face token with write access to that Space only.
-#   3. In this GitHub repository: Settings > Secrets and variables > Actions, add
-#      HF_TOKEN (the token) and the variables HF_SPACE_OWNER and HF_SPACE_NAME.
-#   4. Put config.json (from public/config.example.json) in the Space, or commit
-#      it to the branch you sync from. It holds no secrets, but is public on a
-#      public Space; use Protected visibility if that matters.
+#   2. Turn on two-factor sign-in for the Hugging Face account, then create a
+#      fine-grained token with write access to that one Space only.
+#   3. In this GitHub repository (Settings > Secrets and variables > Actions) add the
+#      secret HF_TOKEN and the variable HF_SPACE_ID (for example jakescott/quote-desk).
+#   4. Commit config.json (from public/config.example.json) into public/ on the
+#      branch you sync from. It holds ids and the shared mailbox address, no secrets,
+#      and is readable by anyone who has the Space's address whatever its visibility.
+#
+# The header at the top of README.md tells the Space how to build (npm ci && npm run
+# build, serving dist/index.html). The Space's own build runs on Node 22.
+# Keyless alternative: Hugging Face "Trusted Publishers" lets this workflow exchange
+# GitHub's OIDC token for a one-hour, one-Space token, so no HF_TOKEN is stored.
 name: Sync to Hugging Face Space
 on:
   push:
@@ -20,12 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: huggingface/hub-sync@v0.3.0
         with:
-          fetch-depth: 0
-      - name: Push to the Space
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          OWNER: ${{ vars.HF_SPACE_OWNER }}
-          SPACE: ${{ vars.HF_SPACE_NAME }}
-        run: |
-          git push --force "https://${OWNER}:${HF_TOKEN}@huggingface.co/spaces/${OWNER}/${SPACE}" HEAD:main
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: ${{ vars.HF_SPACE_ID }}
+          hf_token: ${{ secrets.HF_TOKEN }}
+          space_sdk: static

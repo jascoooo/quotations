@@ -14,6 +14,7 @@ const CSP = [
   "frame-src https://login.microsoftonline.com",
   "form-action https://login.microsoftonline.com",
   "base-uri 'self'",
+  "object-src 'none'",
 ].join('; ');
 
 const cspMeta = (): Plugin => ({

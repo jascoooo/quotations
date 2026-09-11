@@ -17,8 +17,10 @@ import type { AppConfig } from './config';
 import type { ChangeEvent, DataProvider, ExportResult, LiveStatus, ProviderSettings } from './types';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
-// Delegated scopes. Sites.ReadWrite.All is broad; ask IT whether the tenant can grant the app
-// Sites.Selected for just the quotes site instead (then list/drive calls stay the same).
+// Delegated scopes. Sites.ReadWrite.All is broad. The least-privilege form is delegated
+// Sites.Selected (admin consent + a 'write' grant on the one quotes site via
+// POST /sites/{id}/permissions); test the Excel workbook endpoints with it before
+// dropping Files.ReadWrite.All, since their docs only list Files.* scopes.
 const SCOPES = ['User.Read', 'Mail.Read.Shared', 'Sites.ReadWrite.All', 'Files.ReadWrite.All'];
 
 interface ListItem<F> {

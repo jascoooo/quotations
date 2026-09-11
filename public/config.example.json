@@ -1,7 +1,7 @@
 {
   "tenantId": "<your Entra tenant id>",
   "clientId": "<app registration (client) id>",
-  "redirectUri": "https://<where the app is hosted>/",
+  "redirectUri": "https://<owner>-<space>.static.hf.space/index.html",
   "sharedMailbox": "quotes@your-company.co.uk",
   "siteId": "<SharePoint site id>",
   "quotesListId": "<id of the Quotes list>",
@@ -12,8 +12,12 @@
   "contractor": "R Dunham",
   "contractorEmail": "admin@your-company.co.uk",
   "clientName": "Sanctuary",
-  "clientDomains": ["sanctuary.co.uk"],
-  "ownDomains": ["your-company.co.uk"],
+  "clientDomains": [
+    "sanctuary.co.uk"
+  ],
+  "ownDomains": [
+    "your-company.co.uk"
+  ],
   "clientQuotesMailbox": "<the client's quotes mailbox address>",
   "pollSeconds": 30
 }
