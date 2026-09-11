@@ -1,0 +1,19 @@
+{
+  "tenantId": "<your Entra tenant id>",
+  "clientId": "<app registration (client) id>",
+  "redirectUri": "https://<where the app is hosted>/",
+  "sharedMailbox": "quotes@your-company.co.uk",
+  "siteId": "<SharePoint site id>",
+  "quotesListId": "<id of the Quotes list>",
+  "inboxListId": "<id of the Inbox filing list>",
+  "driveId": "<id of the document library holding job folders and the template>",
+  "jobsRootFolder": "Sanctuary jobs",
+  "templateItemId": "<drive item id of the pristine client template .xlsx>",
+  "contractor": "R Dunham",
+  "contractorEmail": "admin@your-company.co.uk",
+  "clientName": "Sanctuary",
+  "clientDomains": ["sanctuary.co.uk"],
+  "ownDomains": ["your-company.co.uk"],
+  "clientQuotesMailbox": "<the client's quotes mailbox address>",
+  "pollSeconds": 30
+}

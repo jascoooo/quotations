@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-demo/
+smoke-shots/
+config.json
+public/config.json
+*.log

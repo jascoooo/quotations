@@ -1,0 +1,268 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { matchEmail } from './lib/match';
+import type { Email, Job, MatchRule, Quote, RateAdjustment, SorCode, Stage } from './lib/types';
+import { loadConfig } from './providers/config';
+import { DemoProvider } from './providers/demo';
+import type { DataProvider, ExportResult } from './providers/types';
+import { Board } from './ui/Board';
+import { Icon } from './ui/bits';
+import { Inbox } from './ui/Inbox';
+import { JobPack } from './ui/JobPack';
+import { QuoteBuilder } from './ui/QuoteBuilder';
+import { Setup } from './ui/Setup';
+
+export type View = { kind: 'board' } | { kind: 'inbox'; emailId?: string } | { kind: 'job'; id: string } | { kind: 'quote'; id: string } | { kind: 'setup' };
+
+interface Toast {
+  id: number;
+  text: string;
+}
+
+const DEMO_ONLY = import.meta.env.VITE_DEMO_ONLY === '1';
+
+async function chooseProvider(): Promise<DataProvider> {
+  const forceDemo = DEMO_ONLY || window.location.hash.includes('demo');
+  if (!forceDemo) {
+    const cfg = await loadConfig();
+    if (cfg) {
+      const { GraphProvider } = await import('./providers/graph');
+      return new GraphProvider(cfg);
+    }
+  }
+  return new DemoProvider();
+}
+
+export function App() {
+  const [provider, setProvider] = useState<DataProvider | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [sor, setSor] = useState<SorCode[]>([]);
+  const [rates, setRates] = useState<RateAdjustment[]>([]);
+  const [view, setView] = useState<View>({ kind: 'board' });
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [, setTick] = useState(0);
+  const toastId = useRef(0);
+
+  const toast = useCallback((text: string) => {
+    const id = ++toastId.current;
+    setToasts((t) => [...t, { id, text }]);
+    window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4200);
+  }, []);
+
+  const reload = useCallback(async (p: DataProvider) => {
+    const [j, e] = await Promise.all([p.listJobs(), p.listEmails()]);
+    setJobs(j);
+    setEmails(e);
+  }, []);
+
+  useEffect(() => {
+    let off = () => undefined as void;
+    (async () => {
+      try {
+        const p = await chooseProvider();
+        await p.init();
+        setProvider(p);
+        const [s, r] = await Promise.all([p.getSorCodes(), p.getRates()]);
+        setSor(s);
+        setRates(r);
+        await reload(p);
+        off = p.subscribe((ev) => {
+          void reload(p);
+          if (ev.note) toast(ev.note);
+          setTick((t) => t + 1);
+        });
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    })();
+    return () => off();
+  }, [reload, toast]);
+
+  // Heartbeat so "last checked" text stays fresh.
+  useEffect(() => {
+    const t = window.setInterval(() => setTick((x) => x + 1), 15000);
+    return () => clearInterval(t);
+  }, []);
+
+  const needsJob = useMemo(() => {
+    const filed = emails.filter((e) => e.jobId);
+    return emails.filter((e) => !e.jobId && !e.ignored && matchEmail(e, jobs, filed).confidence !== 'certain').length;
+  }, [emails, jobs]);
+
+  const moveJob = useCallback(
+    async (id: string, stage: Stage) => {
+      if (!provider) return;
+      setJobs((js) => js.map((j) => (j.id === id ? { ...j, stage } : j)));
+      try {
+        await provider.moveJob(id, stage);
+      } catch (e) {
+        toast(`Could not move the card: ${e instanceof Error ? e.message : e}`);
+        await reload(provider);
+      }
+    },
+    [provider, reload, toast],
+  );
+
+  const updateJob = useCallback(
+    async (job: Job) => {
+      if (!provider) return;
+      setJobs((js) => js.map((j) => (j.id === job.id ? job : j)));
+      await provider.updateJob(job);
+    },
+    [provider],
+  );
+
+  const saveQuote = useCallback(
+    async (jobId: string, quote: Quote) => {
+      if (!provider) return;
+      setJobs((js) => js.map((j) => (j.id === jobId ? { ...j, quote } : j)));
+      await provider.saveQuote(jobId, quote);
+    },
+    [provider],
+  );
+
+  const exportQuote = useCallback(
+    async (jobId: string): Promise<ExportResult | null> => {
+      if (!provider) return null;
+      try {
+        const r = await provider.exportQuote(jobId);
+        toast(`Saved ${r.fileName}`);
+        await reload(provider);
+        return r;
+      } catch (e) {
+        toast(`Export failed: ${e instanceof Error ? e.message : e}`);
+        return null;
+      }
+    },
+    [provider, reload, toast],
+  );
+
+  const fileEmail = useCallback(
+    async (emailId: string, jobId: string, rule: MatchRule) => {
+      if (!provider) return;
+      await provider.fileEmail(emailId, jobId, rule);
+      await reload(provider);
+      toast(`Filed to ${jobId}`);
+    },
+    [provider, reload, toast],
+  );
+
+  const createJob = useCallback(
+    async (emailId: string) => {
+      if (!provider) return;
+      const job = await provider.createJobFromEmail(emailId);
+      await reload(provider);
+      setView({ kind: 'job', id: job.id });
+    },
+    [provider, reload],
+  );
+
+  const ignoreEmail = useCallback(
+    async (emailId: string) => {
+      if (!provider) return;
+      await provider.ignoreEmail(emailId);
+      await reload(provider);
+    },
+    [provider, reload],
+  );
+
+  const refreshInbox = useCallback(async () => {
+    if (!provider) return;
+    await provider.refreshInbox();
+    await reload(provider);
+  }, [provider, reload]);
+
+  if (error) {
+    return (
+      <div className="content">
+        <div className="note danger">
+          <Icon.info />
+          <span>Could not start: {error}</span>
+        </div>
+      </div>
+    );
+  }
+  if (!provider) {
+    return (
+      <div className="content" style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
+        <div className="muted">Signing in and reading the board…</div>
+      </div>
+    );
+  }
+
+  const settings = provider.settings();
+  const live = provider.liveStatus();
+  const currentJob = view.kind === 'job' || view.kind === 'quote' ? jobs.find((j) => j.id === view.id) : undefined;
+
+  return (
+    <div className="shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="logo">
+            <Icon.sheet size={18} />
+          </div>
+          <div>
+            <b>{settings.contractor}</b>
+            <span>Quotes · {settings.clientName}</span>
+          </div>
+        </div>
+        <button className={`nav ${view.kind === 'board' || view.kind === 'job' || view.kind === 'quote' ? 'active' : ''}`} onClick={() => setView({ kind: 'board' })}>
+          <Icon.board /> Quote board
+        </button>
+        <button className={`nav ${view.kind === 'inbox' ? 'active' : ''}`} onClick={() => setView({ kind: 'inbox' })}>
+          <Icon.mail /> Shared inbox {needsJob > 0 && <span className="badge">{needsJob}</span>}
+        </button>
+        <button className={`nav ${view.kind === 'setup' ? 'active' : ''}`} onClick={() => setView({ kind: 'setup' })}>
+          <Icon.settings /> Setup &amp; data
+        </button>
+        <div className="live">
+          <span className="dot" />
+          <span>
+            {provider.mode === 'demo' ? 'Demo · ' : 'Live · '}
+            {live.lastSync ? `checked ${Math.max(0, Math.round((Date.now() - Date.parse(live.lastSync)) / 1000))}s ago` : 'connecting'}
+          </span>
+        </div>
+        {live.recentEditors.length > 0 && (
+          <div className="live" style={{ paddingTop: 2 }}>
+            <Icon.users size={12} />
+            <span>{live.recentEditors.join(', ')}</span>
+          </div>
+        )}
+        <div className="side-foot">
+          <b>
+            <Icon.lock size={14} /> Data stays in-house
+          </b>
+          <span>{provider.mode === 'demo' ? 'Demo mode: made-up data, nothing leaves this browser.' : 'Emails, photos and quotes live in your Microsoft 365. Nothing is sent to outside services.'}</span>
+        </div>
+      </aside>
+
+      <main className="main">
+        {view.kind === 'board' && <Board jobs={jobs} emails={emails} onMove={moveJob} onOpen={(id) => setView({ kind: 'job', id })} onInbox={() => setView({ kind: 'inbox' })} needsJob={needsJob} clientName={settings.clientName} />}
+        {view.kind === 'inbox' && (
+          <Inbox emails={emails} jobs={jobs} settings={settings} initialEmailId={view.emailId} onFile={fileEmail} onCreate={createJob} onIgnore={ignoreEmail} onRefresh={refreshInbox} onOpenJob={(id) => setView({ kind: 'job', id })} live={live} mode={provider.mode} />
+        )}
+        {view.kind === 'job' && currentJob && (
+          <JobPack job={currentJob} emails={emails} sor={sor} settings={settings} provider={provider} onBack={() => setView({ kind: 'board' })} onUpdate={updateJob} onMove={moveJob} onBuild={(id) => setView({ kind: 'quote', id })} onSaveQuote={saveQuote} />
+        )}
+        {view.kind === 'quote' && currentJob && (
+          <QuoteBuilder job={currentJob} sor={sor} rates={rates} settings={settings} mode={provider.mode} onBack={() => setView({ kind: 'job', id: currentJob.id })} onSave={saveQuote} onExport={exportQuote} onMove={moveJob} />
+        )}
+        {(view.kind === 'job' || view.kind === 'quote') && !currentJob && (
+          <div className="content">
+            <div className="empty">That job is no longer on the board.</div>
+          </div>
+        )}
+        {view.kind === 'setup' && <Setup provider={provider} jobs={jobs} emails={emails} sor={sor} rates={rates} onReset={() => window.location.reload()} />}
+      </main>
+
+      <div className="toasts" aria-live="polite">
+        {toasts.map((t) => (
+          <div key={t.id} className="toast">
+            <Icon.users size={14} /> {t.text}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
