@@ -13,17 +13,11 @@ import { priceQuote } from '../lib/pricing';
 import { buildCellMap, buildQuoteFileName, shortRef, type CellWrite } from '../lib/template';
 import type { Email, Job, MatchRule, Photo, Quote, RateAdjustment, SorCode, Stage, User } from '../lib/types';
 import { applyEmailToJob, autoFile } from './autofile';
+import { SCOPES } from './scopes';
 import type { AppConfig } from './config';
 import type { ChangeEvent, DataProvider, ExportResult, LiveStatus, ProviderSettings } from './types';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
-// Delegated scopes. Files.ReadWrite is the least-privileged scope Microsoft documents
-// for the drive and Excel workbook calls (Files.ReadWrite.All is not needed; fall back to
-// it only if a library call is refused). Sites.ReadWrite.All is broad: the least-privilege
-// form for the lists and library is delegated Sites.Selected (admin consent + a 'write'
-// grant on the one quotes site via POST /sites/{id}/permissions). The workbook endpoints
-// are not documented for any Selected scope, so keep Files.ReadWrite alongside it.
-const SCOPES = ['User.Read', 'Mail.Read.Shared', 'Sites.ReadWrite.All', 'Files.ReadWrite'];
 
 interface ListItem<F> {
   id: string;

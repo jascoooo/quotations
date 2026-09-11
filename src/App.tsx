@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { matchEmail } from './lib/match';
 import type { Email, Job, MatchRule, Quote, RateAdjustment, SorCode, Stage } from './lib/types';
-import { loadConfig } from './providers/config';
+import { type AppConfig, loadConfig } from './providers/config';
 import { DemoProvider } from './providers/demo';
 import type { DataProvider, ExportResult } from './providers/types';
 import { Board } from './ui/Board';
+import { Connect } from './ui/Connect';
 import { Icon } from './ui/bits';
 import { Inbox } from './ui/Inbox';
 import { JobPack } from './ui/JobPack';
@@ -20,20 +21,29 @@ interface Toast {
 
 const DEMO_ONLY = import.meta.env.VITE_DEMO_ONLY === '1';
 
-async function chooseProvider(): Promise<DataProvider> {
-  const forceDemo = DEMO_ONLY || window.location.hash.includes('demo');
-  if (!forceDemo) {
-    const cfg = await loadConfig();
-    if (cfg) {
-      const { GraphProvider } = await import('./providers/graph');
-      return new GraphProvider(cfg);
-    }
-  }
-  return new DemoProvider();
+interface Booted {
+  provider: DataProvider;
+  config?: AppConfig;
+  configSource?: 'browser' | 'published';
+}
+
+/**
+ * Demo mode when asked for, Microsoft 365 when this browser has settings, and
+ * otherwise nothing: the setup screen takes over so the first run is a form
+ * rather than a stack trace.
+ */
+async function boot(): Promise<Booted | null> {
+  if (DEMO_ONLY || window.location.hash.includes('demo')) return { provider: new DemoProvider() };
+  const found = await loadConfig();
+  if (!found) return null;
+  const { GraphProvider } = await import('./providers/graph');
+  return { provider: new GraphProvider(found.config), config: found.config, configSource: found.source };
 }
 
 export function App() {
   const [provider, setProvider] = useState<DataProvider | null>(null);
+  const [booted, setBooted] = useState<Booted | null>(null);
+  const [needsSetup, setNeedsSetup] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [emails, setEmails] = useState<Email[]>([]);
@@ -60,8 +70,14 @@ export function App() {
     let off = () => undefined as void;
     (async () => {
       try {
-        const p = await chooseProvider();
+        const b = await boot();
+        if (!b) {
+          setNeedsSetup(true);
+          return;
+        }
+        const p = b.provider;
         await p.init();
+        setBooted(b);
         setProvider(p);
         const [s, r] = await Promise.all([p.getSorCodes(), p.getRates()]);
         setSor(s);
@@ -173,6 +189,16 @@ export function App() {
     await reload(provider);
   }, [provider, reload]);
 
+  if (needsSetup) {
+    return (
+      <Connect
+        onDemo={() => {
+          window.location.hash = 'demo';
+          window.location.reload();
+        }}
+      />
+    );
+  }
   if (error) {
     return (
       <div className="content">
@@ -253,7 +279,7 @@ export function App() {
             <div className="empty">That job is no longer on the board.</div>
           </div>
         )}
-        {view.kind === 'setup' && <Setup provider={provider} jobs={jobs} emails={emails} sor={sor} rates={rates} onReset={() => window.location.reload()} />}
+        {view.kind === 'setup' && <Setup provider={provider} jobs={jobs} emails={emails} sor={sor} rates={rates} config={booted?.config} configSource={booted?.configSource} onReset={() => window.location.reload()} />}
       </main>
 
       <div className="toasts" aria-live="polite">
