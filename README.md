@@ -41,4 +41,6 @@ See `docs/m365-setup.md`: an Entra app registration, a SharePoint site with two 
 - `src/ui/` – the screens: board, shared inbox, job pack, quote builder, setup.
 - `docs/` – the proposal, the design canvas artboards and screenshots, and the Microsoft 365 setup guide.
 
-The header at the top of this file lets the repository be mirrored to a Hugging Face static Space, which builds and serves the app's code. Only code goes there.
+## Deploy
+
+The header at the top of this file, plus `.github/workflows/sync-to-space.yml`, mirror the repository to a free Hugging Face static Space, which builds and serves the app's code. Only code goes there. Setup steps are in `docs/m365-setup.md` section 5. Node 22.12 or newer is required to build (`.nvmrc`).

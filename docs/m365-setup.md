@@ -74,15 +74,20 @@ Note both **list ids** and the **site id** for `config.json`.
 
 Copy `public/config.example.json` to `config.json` next to the built `index.html` and fill it in. If the file is missing or incomplete the app runs in demo mode.
 
-## 5. Hosting
+## 5. Hosting: a Hugging Face static page
 
-The app is static files (`npm run build` → `dist/`). SharePoint cannot serve them as a page, so use one of, in order of preference:
+The company has no Azure subscription and runs no hosting of its own, so the app's code is served by a free Hugging Face **static** Space. Only code goes there. To set it up:
 
-- **Azure Static Web Apps, free tier, in the company's own Azure subscription.** In-tenant and Entra-authenticated, so the code that holds the user's sign-in is never served by a third party. About £0.
-- **Hugging Face static Space** (free): `sdk: static`, `app_build_command: npm ci && npm run build`, `app_file: dist/index.html`. Public visibility shows the source code (no data, no secrets); Protected visibility hides it on a paid plan. Only the app's code is on Hugging Face; emails, photos and quotes never go there. Use this only if an Azure subscription is not an option.
-- **Cloudflare Pages**: also fine; set the redirect URI to match.
+1. On huggingface.co create a Space with SDK **Static**. Note its owner and name. Its address is the redirect URI for the app registration (section 1).
+2. Turn on two-factor sign-in for the Hugging Face account. Create a **fine-grained token with write access to that one Space only**.
+3. In this GitHub repository, add the secret `HF_TOKEN` and the variables `HF_SPACE_OWNER` and `HF_SPACE_NAME` (Settings › Secrets and variables › Actions). The workflow in `.github/workflows/sync-to-space.yml` then mirrors every push to `main` into the Space, and the Space builds it with `npm ci && npm run build` (the header at the top of `README.md` tells it how).
+4. Add `config.json` (from `public/config.example.json`) to the Space, or commit it to `main`. It holds ids and the shared mailbox address, no secrets.
 
-Corporate web filtering must allow `login.microsoftonline.com`, `graph.microsoft.com` and the host you choose. If in-browser AI models are added later, `huggingface.co` and its download hosts (`*.hf.co`) are needed for the one-off model download.
+Visibility: **Public** shows the source code and the built files (there are no secrets in either). **Protected** (paid plan, about £7 a month) hides the source while keeping the page reachable; note that anything the page fetches, including `config.json`, is still reachable by address. **Private** does not work here: colleagues without Hugging Face accounts get a 404.
+
+What protects the sign-in even though a third party serves the code: the code is public and mirrored from GitHub; the token that can change it is limited to the one Space and the account has two-factor; the app registration is single-tenant with the page's exact address as its only redirect; the production build carries a Content-Security-Policy that only lets the page talk to Microsoft; and IT can add a Conditional Access rule requiring a company-managed device for this app.
+
+Corporate web filtering must allow `login.microsoftonline.com`, `graph.microsoft.com`, your SharePoint domain and `*.hf.space`. If in-browser AI models are added later, `huggingface.co` and its download hosts (`*.hf.co`) are needed for the one-off model download.
 
 ## 6. Unattended filing (optional, recommended)
 

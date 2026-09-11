@@ -68,7 +68,7 @@ export function Setup({ provider, jobs, emails, sor, rates, onReset }: Props) {
             <div className="panel">
               <h3>Connecting to Microsoft 365</h3>
               <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6 }}>
-                <li>IT registers the app in Entra ID (single tenant, single-page app, redirect to where this page is hosted). Host it inside your own Azure subscription (Static Web Apps) where possible, so the code that holds your sign-in never comes from a third party.</li>
+                <li>IT registers the app in Entra ID (single tenant, single-page app, redirect set to this page's exact address). The page itself is served as a free static page on Hugging Face, mirrored from the GitHub repository; only code goes there.</li>
                 <li>A SharePoint site with a Quotes list, an Inbox filing list, and a library holding job folders and the pristine template.</li>
                 <li>Full Access to the shared mailbox for the people who will use the app.</li>
                 <li>A <span className="mono">config.json</span> next to the app with the ids above.</li>

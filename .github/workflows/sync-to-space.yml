@@ -1,0 +1,31 @@
+# Mirrors this repository to a Hugging Face static Space, which builds and serves
+# the app's code. Only code goes to Hugging Face: the app's data stays in the
+# company's Microsoft 365 tenant and in the user's browser.
+#
+# One-off setup:
+#   1. Create a Space on huggingface.co (SDK: Static). Note its owner and name.
+#   2. Create a fine-grained Hugging Face token with write access to that Space only.
+#   3. In this GitHub repository: Settings > Secrets and variables > Actions, add
+#      HF_TOKEN (the token) and the variables HF_SPACE_OWNER and HF_SPACE_NAME.
+#   4. Put config.json (from public/config.example.json) in the Space, or commit
+#      it to the branch you sync from. It holds no secrets, but is public on a
+#      public Space; use Protected visibility if that matters.
+name: Sync to Hugging Face Space
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          OWNER: ${{ vars.HF_SPACE_OWNER }}
+          SPACE: ${{ vars.HF_SPACE_NAME }}
+        run: |
+          git push --force "https://${OWNER}:${HF_TOKEN}@huggingface.co/spaces/${OWNER}/${SPACE}" HEAD:main
