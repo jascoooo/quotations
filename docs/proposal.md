@@ -106,14 +106,21 @@ Anything else waits in "Needs a job" for a person. A reply from Sanctuary that m
 
 Microsoft figures are UK list prices excluding VAT, checked against Microsoft's pages on 10 September 2026. Build effort is separate: roughly two to three days for Layer A, four to six weeks of development for Layer B.
 
-## 9. What IT needs to provide
+## 9. What you can do yourself, and the one admin press
 
-- Full Access to the shared mailbox for the account that will own the filing flow (ideally a dedicated licensed account rather than a named person, so it survives staff changes).
-- Confirmation that Power Automate, Office Scripts and Excel on the web are allowed on the work PCs (some Conditional Access settings block them).
-- A SharePoint site, or permission to create one, with audit logging on.
-- For Layer B: an app registration in Entra ID with delegated permissions to read the shared mailbox and read and write the SharePoint site, and consent for it under the tenant's policy.
-- Either allow huggingface.co for one-off model downloads, or agree to hold the model files in SharePoint.
-- Evidence of Cyber Essentials, which Sanctuary's terms expect of suppliers that process their data.
+Most of this needs nobody's permission. Microsoft's defaults let an ordinary user register an app, create a SharePoint site they own, and build lists and folders in it, and the app does that last part itself rather than asking anyone to hand-make twenty columns.
+
+**Yours, about twenty minutes:** register the app in Entra ID (single tenant, single-page app, the app's own address as the redirect); create or pick a SharePoint site; run the app's setup screen, which creates both lists with every column, makes the job folders, uploads the client's template and proves it can read the shared mailbox; publish the resulting `config.json` so colleagues skip all of it.
+
+**The one thing that probably needs the admin account:** agreeing to the permissions. Microsoft's current recommended default for new tenants lets people consent to most permissions but specifically holds back `Sites.ReadWrite.All`, `Files.ReadWrite.All` and `Mail.Read.Shared`, which are three of the five this app asks for. So expect "Need admin approval" at first sign-in. The fix is one button, **Grant admin consent**, on the app registration's API permissions page. It applies to this one app and grants nothing beyond what each signed-in person can already open. Whoever bought the Microsoft 365 subscription usually holds that account, and in a business this size that is often the owner rather than an outside company; you can look up who it is yourself under Roles and administrators.
+
+**Only an admin, and only if it is not already true:** Full Access to the shared mailbox. If the people who will use the app already open that mailbox in Outlook, this is almost certainly already in place and nothing is needed.
+
+**Optional, and skippable for a trial:** "Assignment required" on the app, which restricts sign-in to named staff but forces admin consent even where a user could otherwise consent alone; Conditional Access requiring a company-managed device, which has to be aimed at Exchange and SharePoint rather than at this app and can be narrowed to the quoting team and to browser sign-ins; audit logging, which is off by default on Business plans; retention on the library; and, once the app is proven, swapping the site permission for `Sites.Selected` on the one quotes site.
+
+**For Layer A, separately:** confirmation that Power Automate, Office Scripts and Excel on the web are allowed on the work PCs, and ideally a dedicated licensed account to own the filing flow so it survives staff changes.
+
+**Unrelated to setup:** if in-browser AI models are added later, either allow huggingface.co for the one-off download or hold the model files in SharePoint. And Sanctuary's terms expect evidence of Cyber Essentials from suppliers that process their data.
 
 ## 10. Paperwork before any build
 

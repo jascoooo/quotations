@@ -9,7 +9,7 @@
 
 import { PublicClientApplication, InteractionRequiredAuthError, type AccountInfo } from '@azure/msal-browser';
 import type { AppConfig } from './config';
-import { SCOPES } from './scopes';
+import { SETUP_SCOPES } from './scopes';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
@@ -61,8 +61,10 @@ export const QUOTES_COLUMNS: ColumnSpec[] = [
   { name: 'Stage', kind: 'choice', choices: ['To review', 'To check and amend', 'Ready to send', 'Sent'] },
   { name: 'ContactName', kind: 'text' },
   { name: 'ContactPhone', kind: 'text' },
-  { name: 'DateIssued', kind: 'date' },
-  { name: 'Attended', kind: 'date' },
+  // Text, not a date column: the provider writes an empty string when a job has
+  // no date yet, which a SharePoint date column refuses. Values are ISO yyyy-mm-dd.
+  { name: 'DateIssued', kind: 'text' },
+  { name: 'Attended', kind: 'text' },
   { name: 'TypeOfWorks', kind: 'text' },
   { name: 'Priority', kind: 'text' },
   { name: 'Total', kind: 'number' },
@@ -204,16 +206,24 @@ export async function ensureSignedIn(msal: PublicClientApplication): Promise<Acc
 // ---- the provisioner ----------------------------------------------------
 
 export class Provisioner {
-  constructor(private msal: PublicClientApplication) {}
+  /**
+   * @param scopes SETUP_SCOPES while building the site, because creating lists
+   * and columns needs Sites.Manage.All. The read-only check uses the everyday
+   * scopes, so it proves what a colleague's session will actually be able to do.
+   */
+  constructor(
+    private msal: PublicClientApplication,
+    private scopes: string[] = SETUP_SCOPES,
+  ) {}
 
   private async token(): Promise<string> {
     const account = this.msal.getActiveAccount() ?? this.msal.getAllAccounts()[0];
     try {
-      const r = await this.msal.acquireTokenSilent({ scopes: SCOPES, account: account ?? undefined });
+      const r = await this.msal.acquireTokenSilent({ scopes: this.scopes, account: account ?? undefined });
       return r.accessToken;
     } catch (e) {
       if (e instanceof InteractionRequiredAuthError) {
-        await this.msal.acquireTokenRedirect({ scopes: SCOPES });
+        await this.msal.acquireTokenRedirect({ scopes: this.scopes });
         return new Promise(() => undefined);
       }
       throw e;

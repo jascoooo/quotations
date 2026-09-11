@@ -73,6 +73,9 @@ describe('column definitions', () => {
   it('describes each type the way Graph expects', () => {
     expect(columnBody({ name: 'Total', kind: 'number' })).toMatchObject({ name: 'Total', number: { decimalPlaces: 'two' } });
     expect(columnBody({ name: 'Attended', kind: 'date' })).toMatchObject({ dateTime: { format: 'dateOnly' } });
+    // The board's own date fields are text, because the provider writes '' for "not known yet".
+    expect(QUOTES_COLUMNS.find((c) => c.name === 'Attended')?.kind).toBe('text');
+    expect(QUOTES_COLUMNS.find((c) => c.name === 'DateIssued')?.kind).toBe('text');
     expect(columnBody({ name: 'Ignored', kind: 'yesno' })).toMatchObject({ boolean: {} });
     expect(columnBody({ name: 'Address', kind: 'text' })).toMatchObject({ text: { allowMultipleLines: false, maxLength: 255 } });
   });

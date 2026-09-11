@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type AppConfig, DRAFT_KEY, configJson, missingKeys, saveStoredConfig, withDefaults } from '../providers/config';
 import { Provisioner, type ProvisionInput, type Step, createMsal, diagnose, ensureSignedIn } from '../providers/provision';
+import { SETUP_SCOPES } from '../providers/scopes';
 import { Icon } from './bits';
 
 type Draft = Omit<ProvisionInput, 'templateFile'>;
@@ -87,7 +88,7 @@ export function Connect({ onDemo }: { onDemo: () => void }) {
         setBusy(null);
         return;
       }
-      await msal.loginRedirect({ scopes: ['User.Read', 'Mail.Read.Shared', 'Sites.ReadWrite.All', 'Files.ReadWrite'], redirectUri: REDIRECT_URI });
+      await msal.loginRedirect({ scopes: SETUP_SCOPES, redirectUri: REDIRECT_URI });
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
       setError(diagnose(m) ?? m);
@@ -205,8 +206,7 @@ export function Connect({ onDemo }: { onDemo: () => void }) {
           </p>
           <pre className="code-block small-block">{REDIRECT_URI}</pre>
           <p className="small muted">
-            Then open <b>API permissions</b> and add the delegated Microsoft Graph permissions <span className="mono">User.Read</span>, <span className="mono">Mail.Read.Shared</span>, <span className="mono">Sites.ReadWrite.All</span> and{' '}
-            <span className="mono">Files.ReadWrite</span>. Copy the Application (client) ID and Directory (tenant) ID from the Overview page into the boxes below. If the New registration button is missing, or sign-in later says "Need admin approval",
+            Then open <b>API permissions</b> and add the delegated Microsoft Graph permissions <span className="mono">User.Read</span>, <span className="mono">Mail.Read.Shared</span>, <span className="mono">Sites.ReadWrite.All</span>, <span className="mono">Files.ReadWrite.All</span> and <span className="mono">Sites.Manage.All</span>. Copy the Application (client) ID and Directory (tenant) ID from the Overview page into the boxes below. If the New registration button is missing, or sign-in later says "Need admin approval",
             whoever holds your Microsoft 365 admin account has to do that part once — it is two clicks and nothing else.
           </p>
         </div>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Email, Job, RateAdjustment, SorCode } from '../lib/types';
 import { type AppConfig, clearStoredConfig, configJson } from '../providers/config';
 import { Provisioner, type Step, createMsal, ensureSignedIn } from '../providers/provision';
+import { SCOPES } from '../providers/scopes';
 import type { DataProvider } from '../providers/types';
 import { Icon, fmtDateTime } from './bits';
 
@@ -32,7 +33,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
     try {
       const msal = createMsal(config.tenantId, config.clientId, config.redirectUri);
       await ensureSignedIn(msal);
-      await new Provisioner(msal).check(config, (st) =>
+      await new Provisioner(msal, SCOPES).check(config, (st) =>
         setSteps((prev) => {
           const i = prev.findIndex((x) => x.key === st.key);
           if (i === -1) return [...prev, st];

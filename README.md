@@ -10,7 +10,16 @@ Everything stays in the company's Microsoft 365 tenant and in the user's browser
 
 ## Connect it
 
-See `docs/m365-setup.md`: an Entra app registration, a SharePoint site with two lists and a library, Full Access to the shared mailbox, and a `config.json` next to the built app.
+Open the app with no `config.json` present and it shows a setup screen: register the app once in Entra ID, paste the two IDs and the address of a SharePoint site you own, and it creates the lists, columns and folders itself. `docs/setup.md` has the whole thing, including which single step may need whoever holds the admin account.
+
+## Guides
+
+| Document | For |
+| --- | --- |
+| `docs/setup.md` | connecting it to Microsoft 365, mostly without an administrator |
+| `docs/user-guide.md` | using it day to day |
+| `docs/hosting.md` | publishing it so colleagues can open it |
+| `docs/proposal.md` | why it is built this way, the alternatives, and the data-protection position |
 
 ## Scripts
 
@@ -19,7 +28,7 @@ See `docs/m365-setup.md`: an Entra app registration, a SharePoint site with two 
 | `npm run dev` | local development server |
 | `npm run build` | production build into `dist/` |
 | `npm run build:demo` | single-file demo build into `dist-demo/` (no sign-in, demo data only) |
-| `npm test` | unit tests for matching, pricing, SOR search and the template cell map |
+| `npm test` | unit tests for matching, pricing, SOR search, the template cell map and the setup helpers |
 | `npm run typecheck` | TypeScript |
 | `node scripts/smoke.mjs` | drives the built demo through the main flows in a headless browser |
 
@@ -27,9 +36,9 @@ See `docs/m365-setup.md`: an Entra app registration, a SharePoint site with two 
 
 - `src/lib/` – the logic: reference extraction (`refs.ts`), how an email finds its job (`match.ts`), the client sheet's maths (`pricing.ts`), SOR search (`sor.ts`), where each value goes in the template (`template.ts`).
 - `src/providers/` – two data providers behind one interface: `demo.ts` (in memory) and `graph.ts` (Microsoft 365 via Microsoft Graph). `autofile.ts` is the filing station shared by both.
-- `src/ui/` – the screens: board, shared inbox, job pack, quote builder, setup.
-- `docs/` – the proposal, the design canvas artboards and screenshots, and the Microsoft 365 setup guide.
+- `src/ui/` – the screens: board, shared inbox, job pack, quote builder, setup, and the first-run `Connect.tsx`.
+- `docs/` – the guides above, plus the design canvas artboards and screenshots.
 
 ## Deploy
 
-`.github/workflows/sync-to-space.yml` builds the app on GitHub (Node 22) and publishes only the built files to a free Hugging Face static Space, which serves them at `https://<owner>-<name>.static.hf.space/`. Hugging Face's own build step is not free, so nothing is built there. Only code goes to Hugging Face. Setup steps are in `docs/m365-setup.md` section 5. Node 22.12 or newer is required to build locally (`.nvmrc`).
+`.github/workflows/sync-to-space.yml` builds the app on GitHub (Node 22) and publishes only the built files to a free Hugging Face static Space, which serves them at `https://<owner>-<name>.static.hf.space/`. Hugging Face's own build step is not free, so nothing is built there. Only code goes to Hugging Face. Setup steps are in `docs/hosting.md`. Node 22.12 or newer is required to build locally (`.nvmrc`).

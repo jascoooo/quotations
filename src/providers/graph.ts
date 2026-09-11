@@ -5,7 +5,7 @@
 // (filled through the Excel API so Excel itself saves it).
 //
 // Written against the Graph v1.0 reference; not yet run against a real
-// tenant. See docs/m365-setup.md for the list columns and app registration.
+// tenant. See docs/setup.md for the list columns and app registration.
 
 import { PublicClientApplication, InteractionRequiredAuthError, type AccountInfo } from '@azure/msal-browser';
 import { draftJobFromEmail } from '../lib/match';
