@@ -159,7 +159,7 @@ The five `…Json` columns and `FolderUrl` must be multi-line text: single-line 
 
 Then fill in `config.json` from `public/config.example.json` with the site id, the two list ids, the drive id and the template's item id. The quickest way to find those is Graph Explorer signed in as yourself.
 
-A **Board view** on the Quotes list grouped by `Stage` gives colleagues who prefer SharePoint the same four lanes.
+SharePoint's own **Board view** on the Quotes list, organised by `Stage`, gives colleagues who prefer SharePoint something close to the same four lanes. Microsoft documents the board layout but not which column types it can be organised by, so treat this as worth trying rather than guaranteed.
 
 ## When it goes wrong
 

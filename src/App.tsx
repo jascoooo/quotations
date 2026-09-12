@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { matchEmail } from './lib/match';
 import type { Email, Job, MatchRule, Quote, RateAdjustment, SorCode, Stage } from './lib/types';
-import { type AppConfig, loadConfig } from './providers/config';
+import { type AppConfig, clearStoredConfig, loadConfig } from './providers/config';
+import { diagnose } from './providers/provision';
 import { DemoProvider } from './providers/demo';
 import type { DataProvider, ExportResult } from './providers/types';
 import { Board } from './ui/Board';
@@ -200,11 +201,38 @@ export function App() {
     );
   }
   if (error) {
+    const fix = diagnose(error);
     return (
-      <div className="content">
-        <div className="note danger">
-          <Icon.info />
-          <span>Could not start: {error}</span>
+      <div className="connect">
+        <div className="connect-card">
+          <div className="panel">
+            <h3>The app could not start</h3>
+            {fix && <p style={{ margin: 0, fontSize: 13 }}>{fix}</p>}
+            <p className="small muted" style={{ margin: 0 }}>What Microsoft said: {error}</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button className="btn" onClick={() => window.location.reload()}>
+                <Icon.refresh /> Try again
+              </button>
+              <button
+                className="btn"
+                onClick={() => {
+                  clearStoredConfig();
+                  window.location.reload();
+                }}
+              >
+                Change the connection settings
+              </button>
+              <button
+                className="btn"
+                onClick={() => {
+                  window.location.hash = 'demo';
+                  window.location.reload();
+                }}
+              >
+                Open with example data
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
