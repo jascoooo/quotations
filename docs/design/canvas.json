@@ -10,7 +10,7 @@
     { "file": "QuoteBuilder.dc.html", "title": "4 · Quote builder and export", "x": 1560, "y": 1260, "w": 1440, "h": 1480, "page": "screens" },
     { "file": "Flow.dc.html", "title": "How it fits together", "x": 0, "y": 0, "w": 1440, "h": 840, "page": "approach" },
     { "file": "Options.dc.html", "title": "Four ways to get there", "x": 0, "y": 980, "w": 1440, "h": 780, "page": "approach" },
-    { "file": "Proposal.dc.html", "title": "Written proposal", "x": 1560, "y": 0, "w": 900, "h": 7900, "page": "approach", "print": "flow" }
+    { "file": "Proposal.dc.html", "title": "Written proposal", "x": 1560, "y": 0, "w": 900, "h": 8000, "page": "approach", "print": "flow" }
   ],
   "annotations": [
     { "id": "read-order", "x": 0, "y": -150, "w": 620, "page": "screens", "text": "Read in order 1 → 2 → 3 → 4.\nEmails land in the shared inbox and are filed to a job (2). Clicking a card on the board (1) opens the job pack (3): details, emails, engineer's report and photos gathered in one place. Build quote (4) pre-fills Sanctuary's template and exports the .xlsx into the job folder.\nCards drag between the four stages; each stage is a folder in your SharePoint.\n\nPage 2 (pages menu in the toolbar) has how it works, the four routes compared, and the written proposal." },

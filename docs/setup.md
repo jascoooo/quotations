@@ -84,7 +84,9 @@ Expected, and not a dead end. Send whoever holds the admin account this:
 
 That press is tenant-wide for this one app and nothing else. It does not give the app access to anybody's data beyond what each signed-in person already has.
 
-If the admin consent request workflow is switched on in your tenant, you get a **Request approval** button on the consent screen instead, and they approve by email.
+**It does not have to be a Global Administrator.** Because the app asks only for delegated permissions, the consent can be given by someone holding Cloud Application Administrator, Application Administrator or AI Administrator, or a custom role carrying just the permission to grant consent to applications. Global Administrator and Privileged Role Administrator are only needed for application-only permissions, which this app never uses. That matters if your organisation would rather not hand the Global Administrator account around.
+
+If the admin consent request workflow is switched on in your tenant, you get a **Request approval** button on the consent screen instead, and they approve by email. Switching that workflow on is itself a Global Administrator job and takes up to an hour to take effect, so for a one-off it is quicker to ask for the single press.
 
 ## Step 4. Set your colleagues up in one go (two minutes, you)
 
@@ -104,7 +106,7 @@ Covered in full in `docs/hosting.md`: a free Hugging Face static page, built on 
 | Create the SharePoint site | You |
 | Create the lists, columns, folders | The app, as you |
 | Upload the client's template | You |
-| **Agree to the permissions** | **Probably one press by the admin account holder** |
+| **Agree to the permissions** | **Probably one press. Cloud Application Administrator is enough; it need not be a Global Administrator** |
 | Full Access to the shared mailbox | Already in place if you can open it in Outlook; otherwise an admin, and you cannot grant it to yourself |
 | "Assignment required" on the app | Optional. Skip it for testing: turning it on *forces* admin consent even where a user could otherwise consent alone |
 | Conditional Access, retention, audit logging | Optional hardening, later, admin |
