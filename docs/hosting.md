@@ -1,5 +1,21 @@
 # Putting the app where everyone can open it
 
+## The smallest possible version, for a first test
+
+The app has to be served from a web address, because that address is what Microsoft sign-in is registered against. It cannot run from a file on your desktop, and it cannot run from a Claude artifact, which is sandboxed and blocks the calls to Microsoft.
+
+The least you can get away with is **one file on a free static page, uploaded through a browser**:
+
+1. On huggingface.co, create a Space. SDK **Static**, visibility **Public**, and do not add any files.
+2. Upload the single `index.html` you have been given, using **Files › Add file › Upload files** on the Space page. That is the whole app: the setup screen, the board, the quote builder and the Microsoft sign-in, inlined into one file.
+3. Open `https://<owner>-<name>.static.hf.space/` and follow `docs/setup.md`.
+
+No local install, no Node, no command line, no GitHub secrets, no administrator. To regenerate that file later: `npm run build:single`, which writes `dist-single/index.html`. It carries the same content security policy as the normal build, pinned to a hash of its own code, so the browser will run exactly what was built and can still only talk to Microsoft.
+
+Move to the automated route below once you are past the first test: it keeps the app updating itself from the repository, and splits the code into cacheable files instead of one large one.
+
+## The ongoing version, built on GitHub
+
 The company has no Azure subscription and runs no hosting of its own, so the app is served by a free Hugging Face **static** Space. Only the built files go there; nothing is built on Hugging Face (its build step needs paid credits) and nothing but code ever lives there. To set it up:
 
 1. On huggingface.co create a Space with SDK **Static** and leave it empty. Its address will be `https://<owner>-<name>.static.hf.space/` (lower case, underscores become hyphens). That is the address staff open, and the redirect URI for the app registration (see `docs/setup.md`). Staff must open that address directly, not the Space's page on huggingface.co, which wraps it in a frame that Microsoft sign-in refuses.

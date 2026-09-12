@@ -10,7 +10,8 @@
     "build:demo": "cross-env VITE_DEMO_ONLY=1 vite build --config vite.demo.config.ts",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:single": "vite build --config vite.single.config.ts"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.0.0",

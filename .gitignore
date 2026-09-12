@@ -4,3 +4,4 @@ dist-demo/
 smoke-shots/
 /config.json
 *.log
+dist-single/
