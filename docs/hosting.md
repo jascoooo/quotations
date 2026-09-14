@@ -1,14 +1,30 @@
 # Putting the app where everyone can open it
 
-## The smallest possible version, for a first test
+## You may not need a host at all
 
-The app has to be served from a web address, because that address is what Microsoft sign-in is registered against. It cannot run from a file on your desktop, and it cannot run from a Claude artifact, which is sandboxed and blocks the calls to Microsoft.
+Since the on-this-PC mode has no Microsoft sign-in, there is no redirect address to register and nothing that requires a real web address. **Try opening the single `index.html` straight from your desktop first.** I checked in a Chromium browser that the two things it depends on still work from a local file: the browser storage the board is kept in, and the folder permission the email import needs.
 
-The least you can get away with is **one file on a free static page, uploaded through a browser**:
+Two reasons you might still want it hosted:
 
-1. On huggingface.co, create a Space. SDK **Static**, visibility **Public**, and do not add any files.
-2. Upload the single `index.html` you have been given, using **Files › Add file › Upload files** on the Space page. That is the whole app: the setup screen, the board, the quote builder and the Microsoft sign-in, inlined into one file.
-3. Open `https://<owner>-<name>.static.hf.space/` and follow `docs/setup.md`.
+- **Storage on a local file is shared and easier to lose.** Everything opened from `file://` shares one storage area, so another local page could collide with it, and clearing browsing data is more likely to take it with it. A hosted page gets its own isolated origin.
+- **Updating means re-copying the file** to every person who has one, instead of replacing it in one place.
+
+If your PC blocks local HTML, or you want colleagues on it, host it as below.
+
+## The smallest hosted version
+
+For the **Microsoft 365** mode a web address is not optional: it is what the sign-in is registered against, so that mode cannot run from a file on your desktop. Neither mode can run from a Claude artifact, which is sandboxed and blocks both the folder permission and the calls to Microsoft.
+
+One file on a free static page, uploaded through a browser:
+
+1. Sign in at huggingface.co (a free account) and go to **New › Space**, or [huggingface.co/new-space](https://huggingface.co/new-space).
+2. Give it a name, choose SDK **Static**, leave the hardware on the free CPU option, and set visibility **Public**. Create it. It starts with a placeholder `index.html`.
+3. On the Space, open **Files › Add file › Upload files**, drop in the `index.html` you have been given, and commit. It replaces the placeholder.
+4. Open **`https://<owner>-<space-name>.static.hf.space/`** and follow `docs/setup.md`.
+
+**Use that address, not the huggingface.co page for the Space.** That page shows the app inside a frame, and a framed page from another site is refused the folder permission the email import needs, as well as Microsoft sign-in.
+
+Public visibility is right here. The file is only code: no jobs, no emails, no client data ever goes to Hugging Face, because all of that stays in your browser and your own Microsoft 365. To put out a new version later, upload the new `index.html` over the old one the same way.
 
 No local install, no Node, no command line, no GitHub secrets, no administrator. To regenerate that file later: `npm run build:single`, which writes `dist-single/index.html`. It carries the same content security policy as the normal build, pinned to a hash of its own code, so the browser will run exactly what was built and can still only talk to Microsoft.
 
