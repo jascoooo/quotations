@@ -1,3 +1,4 @@
+import { buildId } from './build-id';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -27,6 +28,7 @@ const cspMeta = (): Plugin => ({
 // or any plain web host. Nothing here talks to a server of its own.
 export default defineConfig({
   plugins: [react(), cspMeta()],
+  define: { __BUILD_ID__: JSON.stringify(buildId()) },
   base: './',
   build: { outDir: 'dist', sourcemap: false, target: 'es2022' },
 });

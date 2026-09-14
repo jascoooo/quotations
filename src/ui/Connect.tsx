@@ -344,6 +344,8 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
 
         <p className="small muted center">
           Stuck? Every step above can be done by hand instead — the list of columns and folders is in <span className="mono">docs/setup.md</span>.
+          <br />
+          <span className="mono tiny">Version {__BUILD_ID__}</span>
         </p>
       </div>
     </div>

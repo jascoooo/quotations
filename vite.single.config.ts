@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { buildId } from './build-id';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
@@ -52,6 +53,7 @@ const cspHashes = (outDir: string): Plugin => ({
 
 export default defineConfig({
   plugins: [react(), viteSingleFile(), cspHashes('dist-single')],
+  define: { __BUILD_ID__: JSON.stringify(buildId()) },
   base: './',
   build: { outDir: 'dist-single', sourcemap: false, target: 'es2022', cssCodeSplit: false, assetsInlineLimit: 100000000 },
 });

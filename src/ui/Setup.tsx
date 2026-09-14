@@ -75,6 +75,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
             <div className="panel">
               <h3>This session</h3>
               <div className="kv" style={{ gridTemplateColumns: '160px 1fr' }}>
+                <span className="k">Version</span><span className="mono">{__BUILD_ID__}</span>
                 <span className="k">Mode</span><span>{provider.mode === 'demo' ? 'Demo: made-up data, no sign-in, nothing leaves this browser' : 'Microsoft 365: your own tenant, via Microsoft Graph'}</span>
                 <span className="k">Signed in as</span><span>{me.name}{me.email ? ` · ${me.email}` : ''}</span>
                 <span className="k">Shared with</span><span>{provider.mode === 'demo' ? 'nobody (demo)' : 'everyone in your tenant who can open the SharePoint site'}</span>
