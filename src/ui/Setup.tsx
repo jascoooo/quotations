@@ -151,7 +151,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
           <div className="stack">
             {local && (
               <div className="panel">
-                <h3>Emails, without signing in</h3>
+                <h3>The shared folder</h3>
                 {folder?.state === 'unsupported' ? (
                   <div className="note warn">
                     <Icon.info size={14} />
@@ -161,7 +161,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
                   <div className="note ok">
                     <Icon.check size={14} />
                     <span>
-                      Watching <b>{folder.name}</b>, checking every 20 seconds. New emails and their photos arrive on their own while the app is open.
+                      Sharing through <b>{folder.name}</b>, checked every 10 seconds. Everyone pointed at this folder sees the same board, and new emails arrive on their own.
                     </span>
                   </div>
                 ) : folder?.state === 'needs-permission' ? (
@@ -171,8 +171,9 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
                   </div>
                 ) : (
                   <p className="small muted" style={{ marginTop: 0 }}>
-                    A Power Automate flow drops each new email from the shared mailbox into a OneDrive folder as a small file, with its photos beside it. Point the app at that folder and they arrive here on their own. Power Automate uses Microsoft's own
-                    connector, so it needs no app registration and nobody's permission: you only need to already have access to the mailbox.
+                    This is what makes the app shared and live without anyone signing in. Point it at a folder that SharePoint or OneDrive syncs to everyone's PC, and the board lives there: one small file per job, re-read every 10 seconds, so a card you move
+                    appears on your colleagues' screens a sync later. A Power Automate flow drops each new email from the shared mailbox into the same folder, so they arrive on their own too. Power Automate uses Microsoft's own connector, so it needs no app
+                    registration and nobody's permission: you only need the mailbox access you already have.
                   </p>
                 )}
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -200,7 +201,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
                         }
                       }}
                     >
-                      <Icon.folder /> {folder?.state === 'watching' ? 'Change folder' : 'Choose the folder'}
+                      <Icon.folder /> {folder?.state === 'watching' ? 'Change folder' : 'Choose the shared folder'}
                     </button>
                   )}
                   {folder?.state === 'watching' && (
@@ -225,7 +226,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
                   <ol style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
                     <li>Go to make.powerautomate.com and choose <b>Create › Automated cloud flow</b>.</li>
                     <li>Trigger: <b>When a new email arrives in a shared mailbox (V2)</b>. Put the shared mailbox address in, folder Inbox, and set <b>Include Attachments</b> to Yes.</li>
-                    <li>Add <b>OneDrive for Business › Create file</b>. Folder: a folder you sync to this PC. File name: <span className="mono">msg-@{'{'}triggerOutputs()?['body/id']{'}'}.json</span> is fussy, so use the expression <span className="mono">concat('msg-', utcNow('yyyyMMddHHmmssfff'), '.json')</span>.</li>
+                    <li>Add <b>OneDrive for Business › Create file</b>. Folder: the <span className="mono">emails</span> folder inside the shared folder. File name: <span className="mono">msg-@{'{'}triggerOutputs()?['body/id']{'}'}.json</span> is fussy, so use the expression <span className="mono">concat('msg-', utcNow('yyyyMMddHHmmssfff'), '.json')</span>.</li>
                     <li>
                       File content: a JSON object with <span className="mono">subject</span>, <span className="mono">body</span>, <span className="mono">from</span>, <span className="mono">receivedAt</span> and an <span className="mono">attachments</span> list of
                       file names, filled from the trigger's dynamic content.
@@ -290,7 +291,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
               <div className="panel">
                 <h3>Your copy of the board</h3>
                 <p className="small muted" style={{ margin: 0 }}>
-                  In this mode everything lives in this browser on this PC. Nothing is shared and nothing is backed up, so save a copy somewhere safe now and then. The file it saves can be loaded on another machine.
+                  With a shared folder, the board is already in SharePoint or OneDrive and backed up with everything else there. Without one, it lives only in this browser, so save a copy somewhere safe now and then.
                 </p>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button

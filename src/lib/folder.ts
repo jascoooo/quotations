@@ -28,7 +28,7 @@ export interface FsDirectoryHandle extends FsHandle {
   kind: 'directory';
   values: () => AsyncIterableIterator<FsHandle>;
 }
-interface FsFileHandle extends FsHandle {
+export interface FsFileHandle extends FsHandle {
   kind: 'file';
   getFile: () => Promise<File>;
 }
@@ -201,4 +201,77 @@ function dataUrl(file: File): Promise<string> {
     r.onerror = () => reject(r.error ?? new Error(`Could not read ${file.name}`));
     r.readAsDataURL(file);
   });
+}
+
+// ---- reading and writing a shared folder --------------------------------
+//
+// The board itself lives in the folder too, one small file per job. That is
+// what makes it shared and live: the folder is a SharePoint or OneDrive folder
+// synced to each person's PC, so a change one person writes appears on the
+// others within a sync. One file per job is deliberate. A single board file
+// would collide every time two people worked at once; separate files only
+// collide if two people edit the same job in the same moment.
+
+interface FsWritable {
+  write: (data: string | BufferSource | Blob) => Promise<void>;
+  close: () => Promise<void>;
+}
+interface FsFileHandleRW extends FsFileHandle {
+  createWritable: () => Promise<FsWritable>;
+}
+interface FsDirectoryHandleRW extends FsDirectoryHandle {
+  getDirectoryHandle: (name: string, o?: { create?: boolean }) => Promise<FsDirectoryHandleRW>;
+  getFileHandle: (name: string, o?: { create?: boolean }) => Promise<FsFileHandleRW>;
+  removeEntry: (name: string, o?: { recursive?: boolean }) => Promise<void>;
+}
+
+export type SharedDir = FsDirectoryHandleRW;
+
+/** Ask for a folder the app may also write the board into. */
+export async function pickSharedFolder(): Promise<SharedDir> {
+  const w = window as unknown as { showDirectoryPicker: (o?: { mode?: 'read' | 'readwrite' }) => Promise<SharedDir> };
+  return w.showDirectoryPicker({ mode: 'readwrite' });
+}
+
+export async function subFolder(dir: SharedDir, name: string): Promise<SharedDir> {
+  return dir.getDirectoryHandle(name, { create: true });
+}
+
+/** Every .json file in a folder, with the time it last changed. */
+export async function listJson(dir: SharedDir): Promise<{ name: string; file: File }[]> {
+  const out: { name: string; file: File }[] = [];
+  for await (const entry of dir.values()) {
+    if (entry.kind !== 'file' || !entry.name.toLowerCase().endsWith('.json')) continue;
+    out.push({ name: entry.name, file: await (entry as FsFileHandle).getFile() });
+  }
+  return out;
+}
+
+export async function writeJson(dir: SharedDir, name: string, value: unknown): Promise<void> {
+  const handle = await dir.getFileHandle(name, { create: true });
+  const w = await handle.createWritable();
+  await w.write(JSON.stringify(value, null, 2));
+  await w.close();
+}
+
+export async function readJson<T>(dir: SharedDir, name: string): Promise<T | undefined> {
+  try {
+    const handle = await dir.getFileHandle(name);
+    return JSON.parse(await (await handle.getFile()).text()) as T;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function removeFile(dir: SharedDir, name: string): Promise<void> {
+  try {
+    await dir.removeEntry(name);
+  } catch {
+    /* already gone */
+  }
+}
+
+/** A file name for a job that is safe on Windows and stable across machines. */
+export function jobFileName(id: string): string {
+  return `${id.replace(/[\\/:*?"<>|]/g, '-')}.json`;
 }

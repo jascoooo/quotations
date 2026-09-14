@@ -7,9 +7,20 @@ There are two ways to run this, and the first one needs nobody's permission.
 
 ---
 
-# On this PC
+# The shared version, with no sign-in
 
-Nothing to install and nobody to ask. The app runs from one file, keeps your jobs in your own browser, and produces the finished spreadsheet through Excel itself.
+Nothing to install and nobody to ask, and still shared and live between everyone. The trick is that the board lives in a folder that SharePoint or OneDrive already syncs to each person's PC. The app reads and writes that folder straight off the disk, and re-reads it every ten seconds, so a card you move appears on your colleagues' screens a sync later. Nobody signs in to the app and there is no server.
+
+The folder holds three things:
+
+```
+Quote Desk/                   a folder shared with the quoting team
+  emails/                     Power Automate drops each new email here
+  jobs/                       the board: one small file per job
+  settings.json               the company and client names, shared
+```
+
+One file per job is deliberate. A single board file would collide every time two people worked at once. Separate files only collide if two people edit the *same* job in the same moment, and then the later save wins, exactly as it would in a spreadsheet.
 
 ## 1. Put the file somewhere you can open it
 
@@ -17,7 +28,11 @@ Upload the single `index.html` to a free Hugging Face static Space, as in `docs/
 
 ## 2. Choose "Start on this PC"
 
-The first screen offers both routes. Take the left-hand one.
+The first screen offers both routes. Take the left-hand one. Despite the name, this is the shared version once you point it at a shared folder in step 4.
+
+## 2a. Make the shared folder
+
+In SharePoint or OneDrive, create a folder called something like **Quote Desk** and share it with everyone who will use the app. Each of them should sync it to their PC, so it appears in File Explorer. You do not need to create anything inside it: the app makes `emails` and `jobs` itself.
 
 ## 3. Load the client's template, once
 
@@ -60,7 +75,7 @@ The flow drops each new email into a OneDrive folder as a small file, with its p
 
 Save it, then send a test email to the shared mailbox.
 
-**Point the app at the folder.** In **Setup & data**, under "Emails, without signing in", press **Choose the folder** and pick the synced folder. The browser asks once for permission. From then on the app checks every 20 seconds while it is open, adds new emails to the shared inbox, attaches their photos to the right job, and files the certain matches automatically, exactly as the Microsoft 365 version does.
+**Point the app at the folder.** In **Setup & data**, under "The shared folder", press **Choose the shared folder** and pick it in File Explorer. Every colleague does the same, once, on their own PC. The browser asks once for permission. From then on the app checks every ten seconds while it is open: it picks up jobs colleagues have changed, adds new emails to the shared inbox, attaches their photos to the right job, and files the certain matches automatically, exactly as the Microsoft 365 version does.
 
 Two things to know. The browser asks for the folder again each session, which is a one-click safety feature and not a fault. And this needs Edge or Chrome: Firefox and Safari have no folder permission, and there the app falls back to pasting emails in.
 
@@ -84,11 +99,16 @@ If Power Automate itself is blocked in your tenant, you will see it as soon as y
 
 Excel does the writing, which is the whole point: the dropdowns, the structured tables and the hidden sheets survive, exactly as they would if you typed the values in by hand. A library that re-saved the workbook would quietly drop them.
 
-## 7. Keeping your work safe
+## 7. What this costs you
 
-Everything is in one browser on one PC. Nothing is shared with colleagues and nothing is backed up. In **Setup & data**, **Save a copy** writes the whole board to a file. Keep it on OneDrive or a network drive, and **Load a copy** brings it back, or moves it to another machine.
+With the shared folder, the board is in SharePoint or OneDrive and is backed up along with everything else there. **Save a copy** in Setup and data still writes the whole board to one file if you want your own.
 
-That is the honest cost of needing no permissions: no live sharing between colleagues, and no filing while the app is shut. The flow keeps collecting emails into the folder regardless; the app takes them in next time it is open. If the app proves itself, the Microsoft 365 route below removes both limits, and it needs one person with an administrator account for about five minutes.
+Two honest limits compared with the Microsoft 365 version:
+
+- **Sharing is as quick as the sync, not instant.** In practice that is seconds, but it is OneDrive's sync rather than a live connection. If two people edit the same job in the same moment, the later save wins and OneDrive may leave a conflict copy in the folder.
+- **Nothing is filed while everyone's app is shut.** The flow keeps collecting emails into the folder overnight regardless; the app takes them in next time somebody opens it.
+
+Neither needs an administrator to fix. If they start to bite, the Microsoft 365 route below removes both, and needs one person with an admin account for about five minutes. If the app proves itself, the Microsoft 365 route below removes both limits, and it needs one person with an administrator account for about five minutes.
 
 ---
 

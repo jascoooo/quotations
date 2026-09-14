@@ -1,17 +1,39 @@
-// On-this-PC mode: the whole app with no sign-in, no app registration and no
-// administrator anywhere.
+// No sign-in, no app registration, no administrator, and still shared and live.
 //
-// Jobs, photos and the client's code list live in this browser's own storage.
-// The quote is produced as an Office Script you run against your copy of the
-// client's template in Excel on the web, so Excel does the writing and the
-// template's dropdowns and tables survive.
+// Everything shared lives in one folder that SharePoint or OneDrive syncs to
+// each person's PC:
 //
-// What this mode cannot do: read the shared mailbox by itself. Emails and
-// photos are added by hand. Everything else — matching an email to a job,
-// searching the codes, the pricing, the cell map — is the same code that the
-// Microsoft 365 mode uses.
+//   <folder>/emails/   a Power Automate flow drops each new email here
+//   <folder>/jobs/     the board, one small file per job, written by the app
+//   <folder>/settings.json
+//
+// The app reads and writes that folder straight off the disk through the
+// browser's folder permission, and re-reads it every few seconds. So a card
+// someone moves appears on everyone else's board a sync later, without anyone
+// signing in to anything and without a server.
+//
+// One file per job is deliberate: a single board file would collide every time
+// two people worked at once, whereas separate files only collide if two people
+// edit the same job in the same moment.
+//
+// Without a folder the app still works, keeping everything in this browser
+// alone. The client's code list always stays local: it is large and identical
+// for everyone.
 
-import { type FsDirectoryHandle, askForFolder, folderPermission, pickFolder, scanFolder, supportsFolderWatch } from '../lib/folder';
+import {
+  type SharedDir,
+  askForFolder,
+  folderPermission,
+  jobFileName,
+  listJson,
+  pickSharedFolder,
+  readJson,
+  removeFile,
+  scanFolder,
+  subFolder,
+  supportsFolderWatch,
+  writeJson,
+} from '../lib/folder';
 import { draftJobFromEmail } from '../lib/match';
 import { idb } from '../lib/store';
 import { buildCellMap, buildQuoteFileName, shortRef } from '../lib/template';
@@ -56,7 +78,11 @@ export class LocalProvider implements DataProvider {
   private cfg: LocalSettings = DEFAULT_LOCAL_SETTINGS;
   private listeners = new Set<(e: ChangeEvent) => void>();
   private lastSync = new Date().toISOString();
-  private folder: FsDirectoryHandle | null = null;
+  private folder: SharedDir | null = null;
+  private jobsDir: SharedDir | null = null;
+  private emailsDir: SharedDir | null = null;
+  /** job id -> the lastModified we last read, so a poll only re-reads changes. */
+  private jobStamps = new Map<string, number>();
   private seen = new Set<string>();
   private timer: number | undefined;
   private folderState: FolderState = 'off';
@@ -73,19 +99,105 @@ export class LocalProvider implements DataProvider {
       this.folderState = 'unsupported';
       return;
     }
-    const saved = await idb.get<FsDirectoryHandle>(KEY_FOLDER);
+    const saved = await idb.get<SharedDir>(KEY_FOLDER);
     if (!saved) return;
     this.folder = saved;
     const perm = await folderPermission(saved);
     if (perm === 'granted') {
-      this.folderState = 'watching';
-      void this.scanNow();
-      this.timer = window.setInterval(() => void this.scanNow(), 20_000);
+      await this.openFolder(saved);
     } else {
       // The browser needs a click before it will hand the folder back.
       this.folderState = 'needs-permission';
     }
   }
+
+  /** Open the shared folder's parts and pull the board in. */
+  private async openFolder(dir: SharedDir): Promise<void> {
+    this.folder = dir;
+    this.emailsDir = await subFolder(dir, 'emails');
+    this.jobsDir = await subFolder(dir, 'jobs');
+    this.ignored = new Set((await readJson<string[]>(dir, 'ignored.json')) ?? []);
+    const shared = await readJson<LocalSettings>(dir, 'settings.json');
+    if (shared) this.cfg = { ...this.cfg, ...shared, templateName: this.cfg.templateName, templateLoadedAt: this.cfg.templateLoadedAt };
+    this.folderState = 'watching';
+    await this.pull();
+    await this.scanNow();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = window.setInterval(() => void this.tick(), 10_000);
+  }
+
+  private async tick(): Promise<void> {
+    await this.pull();
+    await this.scanNow();
+  }
+
+  /**
+   * Re-read the jobs other people have written. Only files whose timestamp
+   * changed are parsed, so this is cheap enough to run every few seconds.
+   */
+  private async pull(): Promise<void> {
+    if (!this.jobsDir) return;
+    let files;
+    try {
+      files = await listJson(this.jobsDir);
+    } catch {
+      this.folderState = 'needs-permission';
+      return;
+    }
+    const present = new Set<string>();
+    let changed = false;
+    const editors = new Set<string>();
+    for (const { name, file } of files) {
+      const existing = this.state.jobs.find((j) => jobFileName(j.id) === name);
+      present.add(name);
+      if (existing && this.jobStamps.get(existing.id) === file.lastModified) continue;
+      let job: Job;
+      try {
+        job = JSON.parse(await file.text()) as Job;
+      } catch {
+        continue; // a half-written file mid-sync: it will be read next time
+      }
+      if (!job?.id) continue;
+      this.jobStamps.set(job.id, file.lastModified);
+      const mine = this.me().name;
+      if (job.updatedBy && job.updatedBy !== mine && Date.now() - Date.parse(job.updatedAt ?? '') < 10 * 60_000) editors.add(job.updatedBy);
+      const i = this.state.jobs.findIndex((j) => j.id === job.id);
+      if (i === -1) this.state.jobs = [job, ...this.state.jobs];
+      else if ((job.updatedAt ?? '') >= (this.state.jobs[i].updatedAt ?? '')) this.state.jobs[i] = job;
+      else continue;
+      changed = true;
+    }
+    // A job someone deleted, or one that never made it to the folder.
+    const gone = this.state.jobs.filter((j) => !present.has(jobFileName(j.id)));
+    if (gone.length) {
+      this.state.jobs = this.state.jobs.filter((j) => present.has(jobFileName(j.id)));
+      changed = true;
+    }
+    this.recentEditors = [...editors];
+    if (changed) {
+      this.linkFiledEmails();
+      this.emit({ kind: 'jobs' });
+    }
+  }
+
+  /** Emails are read-only files, so who they belong to is read off the jobs. */
+  private linkFiledEmails(): void {
+    const byEmail = new Map<string, string>();
+    for (const j of this.state.jobs) for (const id of j.filedEmailIds ?? []) byEmail.set(id, j.id);
+    for (const e of this.state.emails) {
+      const jobId = byEmail.get(e.id);
+      if (jobId) {
+        e.jobId = jobId;
+        e.matchedBy ??= 'work-order';
+      } else if (!this.ignored.has(e.id)) {
+        e.jobId = undefined;
+      }
+      e.ignored = this.ignored.has(e.id);
+    }
+  }
+
+  private recentEditors: string[] = [];
+  private ignored = new Set<string>();
 
   // ---- the watched folder -------------------------------------------------
 
@@ -93,16 +205,24 @@ export class LocalProvider implements DataProvider {
     return { state: this.folderState, name: this.folder?.name, lastScan: this.lastSync };
   }
 
-  /** Choose the folder the flow writes into. Must be called from a click. */
+  /** Choose the shared folder. Must be called from a click. */
   async connectFolder(): Promise<string> {
-    const dir = await pickFolder();
-    this.folder = dir;
+    return this.useFolder(await pickSharedFolder());
+  }
+
+  /** Start sharing through a folder that has already been chosen. */
+  async useFolder(dir: SharedDir): Promise<string> {
     await idb.set(KEY_FOLDER, dir);
-    this.folderState = 'watching';
-    await this.scanNow();
-    if (this.timer) clearInterval(this.timer);
-    this.timer = window.setInterval(() => void this.scanNow(), 20_000);
+    await this.pushAllJobs(dir);
+    await this.openFolder(dir);
     return dir.name;
+  }
+
+  /** Moving in: put anything already on this PC into the shared folder. */
+  private async pushAllJobs(dir: SharedDir): Promise<void> {
+    if (!this.state.jobs.length) return;
+    const jobs = await subFolder(dir, 'jobs');
+    for (const job of this.state.jobs) await writeJson(jobs, jobFileName(job.id), job);
   }
 
   /** Re-ask for a folder chosen in an earlier session. Must be from a click. */
@@ -110,10 +230,7 @@ export class LocalProvider implements DataProvider {
     if (!this.folder) return false;
     const perm = await askForFolder(this.folder);
     if (perm !== 'granted') return false;
-    this.folderState = 'watching';
-    await this.scanNow();
-    if (this.timer) clearInterval(this.timer);
-    this.timer = window.setInterval(() => void this.scanNow(), 20_000);
+    await this.openFolder(this.folder);
     return true;
   }
 
@@ -121,6 +238,8 @@ export class LocalProvider implements DataProvider {
     if (this.timer) clearInterval(this.timer);
     this.timer = undefined;
     this.folder = null;
+    this.jobsDir = null;
+    this.emailsDir = null;
     this.folderState = supportsFolderWatch() ? 'off' : 'unsupported';
     await idb.del(KEY_FOLDER);
     this.emit({ kind: 'emails' });
@@ -132,10 +251,10 @@ export class LocalProvider implements DataProvider {
    * imported once.
    */
   async scanNow(): Promise<{ added: number; skipped: string[] }> {
-    if (!this.folder) return { added: 0, skipped: [] };
+    if (!this.emailsDir) return { added: 0, skipped: [] };
     let result;
     try {
-      result = await scanFolder(this.folder, this.seen);
+      result = await scanFolder(this.emailsDir, this.seen);
     } catch {
       // Usually the permission lapsed, or the folder was moved or unsynced.
       this.folderState = 'needs-permission';
@@ -183,6 +302,14 @@ export class LocalProvider implements DataProvider {
   async saveSettings(next: LocalSettings): Promise<void> {
     this.cfg = next;
     await idb.set(KEY_SETTINGS, next);
+    if (this.folder) {
+      // Shared, so a colleague opening the folder is configured already. The
+      // template is per-PC, so it is left out.
+      const { templateName, templateLoadedAt, ...shared } = next;
+      void templateName;
+      void templateLoadedAt;
+      await writeJson(this.folder, 'settings.json', shared);
+    }
     this.emit({ kind: 'jobs' });
   }
 
@@ -225,6 +352,7 @@ export class LocalProvider implements DataProvider {
     const next = { ...job, updatedAt: new Date().toISOString(), updatedBy: this.me().name };
     this.state.jobs = this.state.jobs.map((j) => (j.id === job.id ? next : j));
     await this.save();
+    await this.push(next);
     this.emit({ kind: 'jobs' });
     return structuredClone(next);
   }
@@ -258,11 +386,14 @@ export class LocalProvider implements DataProvider {
     };
     this.state.jobs = [job, ...this.state.jobs];
     await this.save();
+    await this.push(job);
     this.emit({ kind: 'jobs', note: `${wo} added to the board` });
     return structuredClone(job);
   }
 
   async deleteJob(id: string): Promise<void> {
+    if (this.jobsDir) await removeFile(this.jobsDir, jobFileName(id));
+    this.jobStamps.delete(id);
     this.state.jobs = this.state.jobs.filter((j) => j.id !== id);
     this.state.emails = this.state.emails.map((e) => (e.jobId === id ? { ...e, jobId: undefined } : e));
     await this.save();
@@ -296,10 +427,12 @@ export class LocalProvider implements DataProvider {
     };
     job = applyEmailToJob(job, email, this.cfg);
     job = this.withFolderPhotos(job, email.id);
+    job = { ...job, filedEmailIds: [email.id] };
     this.state.jobs = [job, ...this.state.jobs];
     email.jobId = job.id;
     email.matchedBy = 'work-order';
     await this.save();
+    await this.push(job);
     this.emit({ kind: 'jobs', note: `New job ${job.workOrder} created` });
     return structuredClone(job);
   }
@@ -368,8 +501,10 @@ export class LocalProvider implements DataProvider {
     email.ignored = false;
     let next = applyEmailToJob(job, email, this.cfg);
     next = this.withFolderPhotos(next, email.id);
+    next = { ...next, filedEmailIds: [...new Set([...(next.filedEmailIds ?? []), email.id])] };
     this.state.jobs = this.state.jobs.map((j) => (j.id === jobId ? next : j));
     await this.save();
+    await this.push(next);
     this.emit({ kind: 'emails' });
     this.emit({ kind: 'jobs' });
   }
@@ -379,7 +514,9 @@ export class LocalProvider implements DataProvider {
     if (!email) return;
     email.ignored = true;
     email.jobId = undefined;
+    this.ignored.add(emailId);
     await this.save();
+    if (this.folder) await writeJson(this.folder, 'ignored.json', [...this.ignored]);
     this.emit({ kind: 'emails' });
   }
 
@@ -429,7 +566,7 @@ export class LocalProvider implements DataProvider {
   }
 
   liveStatus(): LiveStatus {
-    return { lastSync: this.lastSync, polling: this.folderState === 'watching', recentEditors: [] };
+    return { lastSync: this.lastSync, polling: this.folderState === 'watching', recentEditors: this.recentEditors };
   }
 
   /** Everything on this machine, as one file you can keep or move. */
@@ -475,6 +612,21 @@ export class LocalProvider implements DataProvider {
       await idb.set(KEY_STATE, this.state);
     } catch {
       /* storage blocked: carry on in memory for this session */
+    }
+  }
+
+  /** Write one job to the shared folder, so colleagues see it. */
+  private async push(job: Job): Promise<void> {
+    if (!this.jobsDir) return;
+    try {
+      await writeJson(this.jobsDir, jobFileName(job.id), job);
+      // Skip the echo of our own write on the next poll.
+      const files = await listJson(this.jobsDir);
+      const mine = files.find((f) => f.name === jobFileName(job.id));
+      if (mine) this.jobStamps.set(job.id, mine.file.lastModified);
+    } catch {
+      this.folderState = 'needs-permission';
+      this.emit({ kind: 'jobs' });
     }
   }
 }

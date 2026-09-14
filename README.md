@@ -14,7 +14,7 @@ Open the app and choose **Start on this PC**. No sign-in, no Entra app registrat
 
 - The client's template is read once, locally, for its code list and rate table.
 - Emails arrive on their own: a Power Automate flow (Microsoft's own standard connector, no registration and nobody's permission) drops each one into a synced OneDrive folder, and the app reads that folder off the disk.
-- Jobs live in this browser.
+- The board is shared and live: it lives as one file per job in a SharePoint or OneDrive folder synced to each PC, re-read every ten seconds, so colleagues see each other's changes without anyone signing in.
 - The finished quote comes out as an Office Script you run in Excel on the web, so the template's dropdowns and tables survive.
 
 `docs/setup.md` has the whole thing, including the flow.

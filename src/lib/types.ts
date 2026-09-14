@@ -125,6 +125,8 @@ export interface Job {
   sources: Partial<Record<'workOrder' | 'purchaseOrder' | 'address' | 'postcode' | 'locationOfWorks' | 'contact' | 'dateIssued' | 'attended', FieldSource>>;
   updatedAt: string;
   updatedBy?: string;
+  /** Emails filed to this job. The source of truth when the board is shared. */
+  filedEmailIds?: string[];
 }
 
 export interface SorCode {
