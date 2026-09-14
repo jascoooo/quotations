@@ -8,6 +8,10 @@ Everything stays in the company's Microsoft 365 tenant and in the user's browser
 
 `npm install`, then `npm run dev` and open the address it prints with `#demo` on the end. Demo mode uses made-up data in memory (one job mirrors the supplied example spreadsheet); nothing is signed in to.
 
+## Run it with no permissions at all
+
+Open the app and choose **Start on this PC**. No sign-in, no Entra app registration, no administrator: you load the client's template once, jobs live in your browser, and the finished quote comes out as an Office Script you run in Excel on the web, so the template's dropdowns and tables survive. `docs/setup.md` has the whole thing.
+
 ## Connect it
 
 Open the app with no `config.json` present and it shows a setup screen: register the app once in Entra ID, paste the two IDs and the address of a SharePoint site you own, and it creates the lists, columns and folders itself. `docs/setup.md` has the whole thing, including which single step may need whoever holds the admin account.
@@ -29,14 +33,15 @@ Open the app with no `config.json` present and it shows a setup screen: register
 | `npm run build` | production build into `dist/` |
 | `npm run build:demo` | single-file demo build into `dist-demo/` (no sign-in, demo data only) |
 | `npm run build:single` | single-file build of the real app into `dist-single/`, for uploading to a static host by hand |
+| `node scripts/local-smoke.mjs` | drives the on-this-PC mode end to end against a real client template |
 | `npm test` | unit tests for matching, pricing, SOR search, the template cell map and the setup helpers |
 | `npm run typecheck` | TypeScript |
 | `node scripts/smoke.mjs` | drives the built demo through the main flows in a headless browser |
 
 ## Layout
 
-- `src/lib/` – the logic: reference extraction (`refs.ts`), how an email finds its job (`match.ts`), the client sheet's maths (`pricing.ts`), SOR search (`sor.ts`), where each value goes in the template (`template.ts`).
-- `src/providers/` – two data providers behind one interface: `demo.ts` (in memory) and `graph.ts` (Microsoft 365 via Microsoft Graph). `autofile.ts` is the filing station shared by both.
+- `src/lib/` – the logic: reference extraction (`refs.ts`), how an email finds its job (`match.ts`), the client sheet's maths (`pricing.ts`), SOR search (`sor.ts`), where each value goes in the template (`template.ts`), reading the client's workbook (`xlsx.ts`), and the Office Script the offline mode emits (`officeScript.ts`).
+- `src/providers/` – three data providers behind one interface: `demo.ts` (in memory), `local.ts` (this browser, no sign-in) and `graph.ts` (Microsoft 365 via Microsoft Graph). `autofile.ts` is the filing station they share.
 - `src/ui/` – the screens: board, shared inbox, job pack, quote builder, setup, and the first-run `Connect.tsx`.
 - `docs/` – the guides above, plus the design canvas artboards and screenshots.
 

@@ -11,7 +11,7 @@ interface Props {
   settings: ProviderSettings;
   initialEmailId?: string;
   live: LiveStatus;
-  mode: 'demo' | 'm365';
+  mode: 'demo' | 'local' | 'm365';
   onFile: (emailId: string, jobId: string, rule: MatchRule) => Promise<void>;
   onCreate: (emailId: string) => Promise<void>;
   onIgnore: (emailId: string) => Promise<void>;

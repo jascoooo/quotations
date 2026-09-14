@@ -25,7 +25,7 @@ export interface ExportResult {
  * The screens never know which one they are talking to.
  */
 export interface DataProvider {
-  readonly mode: 'demo' | 'm365';
+  readonly mode: 'demo' | 'local' | 'm365';
   init(): Promise<void>;
   me(): User;
   signOut(): Promise<void>;

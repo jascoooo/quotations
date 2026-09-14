@@ -33,8 +33,14 @@ interface Booted {
  * otherwise nothing: the setup screen takes over so the first run is a form
  * rather than a stack trace.
  */
+const LOCAL_CHOSEN = 'quote-desk-local-mode';
+
 async function boot(): Promise<Booted | null> {
   if (DEMO_ONLY || window.location.hash.includes('demo')) return { provider: new DemoProvider() };
+  if (window.location.hash.includes('local') || localStorage.getItem(LOCAL_CHOSEN) === '1') {
+    const { LocalProvider } = await import('./providers/local');
+    return { provider: new LocalProvider() };
+  }
   const found = await loadConfig();
   if (!found) return null;
   const { GraphProvider } = await import('./providers/graph');
@@ -45,6 +51,7 @@ export function App() {
   const [provider, setProvider] = useState<DataProvider | null>(null);
   const [booted, setBooted] = useState<Booted | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
+  const [adding, setAdding] = useState<{ workOrder: string; address: string; postcode: string; title: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [emails, setEmails] = useState<Email[]>([]);
@@ -197,6 +204,14 @@ export function App() {
           window.location.hash = 'demo';
           window.location.reload();
         }}
+        onLocal={() => {
+          try {
+            localStorage.setItem(LOCAL_CHOSEN, '1');
+          } catch {
+            window.location.hash = 'local';
+          }
+          window.location.reload();
+        }}
       />
     );
   }
@@ -292,7 +307,18 @@ export function App() {
       </aside>
 
       <main className="main">
-        {view.kind === 'board' && <Board jobs={jobs} emails={emails} onMove={moveJob} onOpen={(id) => setView({ kind: 'job', id })} onInbox={() => setView({ kind: 'inbox' })} needsJob={needsJob} clientName={settings.clientName} />}
+        {view.kind === 'board' && (
+          <Board
+            jobs={jobs}
+            emails={emails}
+            onMove={moveJob}
+            onOpen={(id) => setView({ kind: 'job', id })}
+            onInbox={() => setView({ kind: 'inbox' })}
+            needsJob={needsJob}
+            clientName={settings.clientName}
+            onAddJob={provider.mode === 'local' ? () => setAdding({ workOrder: '', address: '', postcode: '', title: '' }) : undefined}
+          />
+        )}
         {view.kind === 'inbox' && (
           <Inbox emails={emails} jobs={jobs} settings={settings} initialEmailId={view.emailId} onFile={fileEmail} onCreate={createJob} onIgnore={ignoreEmail} onRefresh={refreshInbox} onOpenJob={(id) => setView({ kind: 'job', id })} live={live} mode={provider.mode} />
         )}
@@ -309,6 +335,55 @@ export function App() {
         )}
         {view.kind === 'setup' && <Setup provider={provider} jobs={jobs} emails={emails} sor={sor} rates={rates} config={booted?.config} configSource={booted?.configSource} onReset={() => window.location.reload()} />}
       </main>
+
+      {adding && (
+        <div className="modal-bg" onClick={() => setAdding(null)}>
+          <div className="modal" style={{ width: 'min(520px, 100%)' }} onClick={(e) => e.stopPropagation()}>
+            <h2>Add a job</h2>
+            <span className="small muted">The work order is what everything else hangs off. The rest can be filled in later on the job page.</span>
+            <div className="form-grid">
+              <label className="wide">
+                <span>Work order</span>
+                <input className="input mono" autoFocus value={adding.workOrder} placeholder="SANC004958" onChange={(e) => setAdding({ ...adding, workOrder: e.target.value })} />
+              </label>
+              <label className="wide">
+                <span>Address</span>
+                <input className="input" value={adding.address} placeholder="31 Cathedral Drive, Basildon" onChange={(e) => setAdding({ ...adding, address: e.target.value })} />
+              </label>
+              <label>
+                <span>Postcode</span>
+                <input className="input" value={adding.postcode} placeholder="SS15 5WF" onChange={(e) => setAdding({ ...adding, postcode: e.target.value })} />
+              </label>
+              <label>
+                <span>What the job is</span>
+                <input className="input" value={adding.title} placeholder="Garage door" onChange={(e) => setAdding({ ...adding, title: e.target.value })} />
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn" onClick={() => setAdding(null)}>
+                Cancel
+              </button>
+              <button
+                className="btn primary"
+                disabled={!adding.workOrder.trim()}
+                onClick={async () => {
+                  const p = provider as unknown as { createJob: (s: typeof adding) => Promise<{ id: string }> };
+                  try {
+                    const job = await p.createJob(adding);
+                    setAdding(null);
+                    await reload(provider);
+                    setView({ kind: 'job', id: job.id });
+                  } catch (e) {
+                    toast(e instanceof Error ? e.message : String(e));
+                  }
+                }}
+              >
+                Add it <Icon.arrow />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="toasts" aria-live="polite">
         {toasts.map((t) => (

@@ -1,5 +1,59 @@
 # Setting up Quote Desk
 
+There are two ways to run this, and the first one needs nobody's permission.
+
+- **On this PC.** No sign-in, no app registration, no administrator. Start here. Everything below the next heading.
+- **Microsoft 365.** The shared, live version. It needs an app registration in your directory, and if that page is closed to you, it cannot be done. That route starts at "Connecting it to Microsoft 365" further down.
+
+---
+
+# On this PC
+
+Nothing to install and nobody to ask. The app runs from one file, keeps your jobs in your own browser, and produces the finished spreadsheet through Excel itself.
+
+## 1. Put the file somewhere you can open it
+
+Upload the single `index.html` to a free Hugging Face static Space, as in `docs/hosting.md`, and open the Space address. There is no sign-in, so there is no redirect address to register and nothing for Microsoft to approve.
+
+## 2. Choose "Start on this PC"
+
+The first screen offers both routes. Take the left-hand one.
+
+## 3. Load the client's template, once
+
+Open **Setup & data** and choose the client's blank template `.xlsx`. The app reads the schedule-of-rates list and the contractor rate table out of it, which takes a few seconds, and keeps them in this browser. The file itself is not stored, not copied and not sent anywhere: only read.
+
+You should see the number of codes it found. For Sanctuary's V1.0 template that is 3,581 codes and 15 contractor rate rows.
+
+## 4. Work
+
+- **Add job** on the board starts a job from a work order number.
+- The job page takes the address, the report and the photos. Drop photos straight onto it.
+- **Build quote** works exactly as in the shared version: search the real codes by number or by words, set quantities, and the totals apply your contractor adjustment, including the separate rate above and below £20,000.
+- Emails can be pasted in, and the app still matches them to jobs by work order, purchase order or address. It cannot read the mailbox by itself in this mode.
+
+## 5. Getting the spreadsheet out
+
+**Export** does not write the file here, because without a sign-in the app has no way to reach your SharePoint. Instead it writes an **Office Script**, which is a small piece of Excel automation that needs no administrator and is included with the business Microsoft 365 plans.
+
+1. Make a copy of the client's blank template and rename the copy to the file name the app shows.
+2. Open that copy in **Excel on the web**, not the desktop app.
+3. **Automate › New Script**, delete what is there, paste the script in, press **Run**.
+4. Check the total on the sheet against the total the app showed. They should agree to the penny.
+
+Excel does the writing, which is the whole point: the dropdowns, the structured tables and the hidden sheets survive, exactly as they would if you typed the values in by hand. A library that re-saved the workbook would quietly drop them.
+
+## 6. Keeping your work safe
+
+Everything is in one browser on one PC. Nothing is shared with colleagues and nothing is backed up. In **Setup & data**, **Save a copy** writes the whole board to a file. Keep it on OneDrive or a network drive, and **Load a copy** brings it back, or moves it to another machine.
+
+That is the honest cost of needing no permissions: no live sharing, and no automatic filing overnight. If the app proves itself, the Microsoft 365 route below removes both limits, and it needs one person with an administrator account for about five minutes.
+
+---
+
+
+# Connecting it to Microsoft 365
+
 Written for the person who will use the app, not for an IT department. Almost all of it you can do yourself in about twenty minutes. There is exactly one step that may need whoever holds your Microsoft 365 admin account, and it is a single button press.
 
 Everything the app touches stays inside your own Microsoft 365. Nothing here is secret: the app has no password of its own, and every person signs in as themselves and sees only what they could already open.

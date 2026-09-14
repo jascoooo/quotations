@@ -34,7 +34,7 @@ function readDraft(): Draft {
 
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 
-export function Connect({ onDemo }: { onDemo: () => void }) {
+export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () => void }) {
   const [draft, setDraft] = useState<Draft>(readDraft);
   const [account, setAccount] = useState<string | null>(null);
   const [busy, setBusy] = useState<'signin' | 'run' | null>(null);
@@ -193,6 +193,28 @@ export function Connect({ onDemo }: { onDemo: () => void }) {
           <span>
             Want to look around first? <button className="linkbtn" onClick={onDemo}>Open it with example data</button> — made-up jobs, no sign-in, nothing leaves this browser.
           </span>
+        </div>
+
+        <div className="panel choose">
+          <h3>Two ways to run it</h3>
+          <div className="choice-grid">
+            <div className="choice">
+              <b>On this PC</b>
+              <p>
+                No sign-in, no app registration, nobody's permission needed. You load the client's template once, keep jobs in this browser, and the finished quote comes out as a script you run in Excel on the web. Emails and photos are added by hand.
+              </p>
+              <button className="btn primary" onClick={onLocal}>
+                Start on this PC <Icon.arrow />
+              </button>
+            </div>
+            <div className="choice">
+              <b>Microsoft 365</b>
+              <p>
+                The shared version: the board is live for everyone, the shared mailbox files itself, and the app writes the spreadsheet into SharePoint. It needs an app registration in your directory, which is set up below.
+              </p>
+              <span className="small muted">If the registration page is not open to you, use the left-hand option. Microsoft has no way around that one.</span>
+            </div>
+          </div>
         </div>
 
         <div className="panel">

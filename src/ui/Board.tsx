@@ -12,9 +12,10 @@ interface Props {
   onMove: (id: string, stage: Stage) => void;
   onOpen: (id: string) => void;
   onInbox: () => void;
+  onAddJob?: () => void;
 }
 
-export function Board({ jobs, emails, needsJob, clientName, onMove, onOpen, onInbox }: Props) {
+export function Board({ jobs, emails, needsJob, clientName, onMove, onOpen, onInbox, onAddJob }: Props) {
   const [query, setQuery] = useState('');
   // Order within a column is kept for the session; new cards join at the top.
   const [order, setOrder] = useState<Record<Stage, string[]>>({ review: [], amend: [], ready: [], sent: [] });
@@ -69,6 +70,11 @@ export function Board({ jobs, emails, needsJob, clientName, onMove, onOpen, onIn
         </div>
         <span className="pill neutral">Client: {clientName}</span>
         <div className="spacer" />
+        {onAddJob && (
+          <button className="btn primary" onClick={onAddJob}>
+            <Icon.plus /> Add job
+          </button>
+        )}
         {needsJob > 0 && (
           <button className="btn warn" onClick={onInbox}>
             <Icon.mail /> {needsJob} email{needsJob === 1 ? '' : 's'} need a job

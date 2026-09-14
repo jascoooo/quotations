@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Email, Job, RateAdjustment, SorCode } from '../lib/types';
 import { type AppConfig, clearStoredConfig, configJson } from '../providers/config';
+import type { LocalProvider } from '../providers/local';
 import { Provisioner, type Step, createMsal, ensureSignedIn } from '../providers/provision';
 import { SCOPES } from '../providers/scopes';
 import type { DataProvider } from '../providers/types';
@@ -24,6 +25,10 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
   const [steps, setSteps] = useState<Step[]>([]);
   const [checking, setChecking] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const local = provider.mode === 'local' ? (provider as unknown as LocalProvider) : null;
+  const ls = local?.localSettings();
   const json = useMemo(() => (config ? configJson(config) : ''), [config]);
 
   const check = async () => {
@@ -142,6 +147,97 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
           </div>
 
           <div className="stack">
+            {local && (
+              <div className="panel">
+                <h3>The client's template</h3>
+                {ls?.templateName ? (
+                  <div className="note ok">
+                    <Icon.check size={14} />
+                    <span>
+                      Read from <b>{ls.templateName}</b>. {sor.length.toLocaleString('en-GB')} codes and {rates.length} contractor rate{rates.length === 1 ? '' : 's'} are stored on this PC.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="note warn">
+                    <Icon.info size={14} />
+                    <span>Load the client's blank template once. The app reads the code list and the rate table out of it; the file itself is not kept or sent anywhere.</span>
+                  </div>
+                )}
+                <input
+                  className="input file"
+                  type="file"
+                  accept=".xlsx"
+                  disabled={loading}
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f || !local) return;
+                    setLoading(true);
+                    setMsg(null);
+                    try {
+                      const r = await local.loadTemplate(f);
+                      setMsg({ ok: true, text: `Read ${r.codes.toLocaleString('en-GB')} codes and ${r.rates} rate row(s). Reload to use them.` });
+                    } catch (err) {
+                      setMsg({ ok: false, text: err instanceof Error ? err.message : String(err) });
+                    }
+                    setLoading(false);
+                  }}
+                />
+                {loading && <span className="small muted">Reading the workbook, this takes a few seconds…</span>}
+                {msg && (
+                  <div className={`note ${msg.ok ? 'ok' : 'danger'}`}>
+                    <Icon.info size={14} />
+                    <span>{msg.text}</span>
+                  </div>
+                )}
+                {msg?.ok && (
+                  <button className="btn primary" onClick={() => window.location.reload()}>
+                    <Icon.refresh /> Reload
+                  </button>
+                )}
+              </div>
+            )}
+            {local && (
+              <div className="panel">
+                <h3>Your copy of the board</h3>
+                <p className="small muted" style={{ margin: 0 }}>
+                  In this mode everything lives in this browser on this PC. Nothing is shared and nothing is backed up, so save a copy somewhere safe now and then. The file it saves can be loaded on another machine.
+                </p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    className="btn"
+                    onClick={async () => {
+                      if (!local) return;
+                      const blob = new Blob([await local.exportAll()], { type: 'application/json' });
+                      const a = document.createElement('a');
+                      a.href = URL.createObjectURL(blob);
+                      a.download = `quote-desk-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                      a.click();
+                      URL.revokeObjectURL(a.href);
+                    }}
+                  >
+                    <Icon.download /> Save a copy
+                  </button>
+                  <label className="btn" style={{ cursor: 'pointer' }}>
+                    <Icon.file /> Load a copy
+                    <input
+                      type="file"
+                      accept="application/json,.json"
+                      style={{ display: 'none' }}
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f || !local) return;
+                        try {
+                          const r = await local.importAll(await f.text());
+                          setMsg({ ok: true, text: `Loaded ${r.jobs} job(s). Reload to see them.` });
+                        } catch (err) {
+                          setMsg({ ok: false, text: err instanceof Error ? err.message : String(err) });
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
             {config ? (
               <div className="panel">
                 <h3>Set everyone else up in one go</h3>

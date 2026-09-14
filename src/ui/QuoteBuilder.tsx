@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { gbp, priceQuote } from '../lib/pricing';
 import { buildIndex, searchSor } from '../lib/sor';
 import { PRIORITIES, TYPES_OF_WORKS, type Job, type Quote, type RateAdjustment, type SorCode, type Stage } from '../lib/types';
+import { buildOfficeScript } from '../lib/officeScript';
 import type { ExportResult, ProviderSettings } from '../providers/types';
 import { Icon, StagePill, fmtDateTime } from './bits';
 import { seedQuote } from './JobPack';
@@ -11,7 +12,7 @@ interface Props {
   sor: SorCode[];
   rates: RateAdjustment[];
   settings: ProviderSettings;
-  mode: 'demo' | 'm365';
+  mode: 'demo' | 'local' | 'm365';
   onBack: () => void;
   onSave: (jobId: string, quote: Quote) => Promise<void>;
   onExport: (jobId: string) => Promise<ExportResult | null>;
@@ -25,6 +26,7 @@ export function QuoteBuilder({ job, sor, rates, settings, mode, onBack, onSave, 
   const [hl, setHl] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [result, setResult] = useState<ExportResult | null>(null);
+  const [scriptCopied, setScriptCopied] = useState(false);
   const dirty = useRef(false);
 
   const index = useMemo(() => buildIndex(sor), [sor]);
@@ -295,7 +297,7 @@ export function QuoteBuilder({ job, sor, rates, settings, mode, onBack, onSave, 
       {result && (
         <div className="modal-bg" onClick={() => setResult(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>{mode === 'demo' ? 'What would be written' : 'Spreadsheet saved'}</h2>
+            <h2>{mode === 'demo' ? 'What would be written' : mode === 'local' ? 'Your quote, ready for Excel' : 'Spreadsheet saved'}</h2>
             <span className="mono small" style={{ color: 'var(--accent)', wordBreak: 'break-all' }}>{result.fileName}</span>
             {result.webUrl && (
               <a className="btn primary" href={result.webUrl} target="_blank" rel="noreferrer" style={{ alignSelf: 'flex-start' }}>
@@ -303,6 +305,48 @@ export function QuoteBuilder({ job, sor, rates, settings, mode, onBack, onSave, 
               </a>
             )}
             {mode === 'demo' && <div className="note">Demo mode has no template to write into. In Microsoft 365 mode these {result.writes.length} cells are written into a fresh copy of the client's template in the job folder, and the sheet's own totals are read back and compared with the app's before the card moves on.</div>}
+            {mode === 'local' && (
+              <>
+                <div className="note">
+                  <Icon.info size={14} />
+                  <span>
+                    Make a copy of {settings.clientName}'s blank template, rename it to the file name above, and open the copy in <b>Excel on the web</b>. Then Automate › New Script, paste this in, and press Run. Excel writes the {result.writes.length} cells itself, so the
+                    dropdowns, tables and hidden sheets are left exactly as they came.
+                  </span>
+                </div>
+                <pre className="code-block" style={{ maxHeight: 260 }}>{buildOfficeScript(result.writes, result.fileName)}</pre>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    className="btn primary"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(buildOfficeScript(result.writes, result.fileName));
+                        setScriptCopied(true);
+                        window.setTimeout(() => setScriptCopied(false), 2500);
+                      } catch {
+                        setScriptCopied(false);
+                      }
+                    }}
+                  >
+                    <Icon.file /> {scriptCopied ? 'Copied' : 'Copy the script'}
+                  </button>
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      const blob = new Blob([buildOfficeScript(result.writes, result.fileName)], { type: 'text/plain' });
+                      const a = document.createElement('a');
+                      a.href = URL.createObjectURL(blob);
+                      a.download = `${result.fileName.replace(/\.xlsx$/i, '')}.osts.ts`;
+                      a.click();
+                      URL.revokeObjectURL(a.href);
+                    }}
+                  >
+                    <Icon.download /> Save it as a file
+                  </button>
+                </div>
+                <span className="small muted">After running it, check the sheet's own total against the {gbp(totals.total)} above. They should match to the penny.</span>
+              </>
+            )}
             {result.sheetTotals && (
               <div className={`note ${result.mismatch ? 'danger' : ''}`}>
                 {result.mismatch ? <Icon.info size={14} /> : <Icon.check size={14} />}
