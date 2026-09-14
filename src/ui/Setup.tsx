@@ -28,6 +28,7 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const local = provider.mode === 'local' ? (provider as unknown as LocalProvider) : null;
+  const folder = local?.folderStatus();
   const ls = local?.localSettings();
   const json = useMemo(() => (config ? configJson(config) : ''), [config]);
 
@@ -147,6 +148,94 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
           </div>
 
           <div className="stack">
+            {local && (
+              <div className="panel">
+                <h3>Emails, without signing in</h3>
+                {folder?.state === 'unsupported' ? (
+                  <div className="note warn">
+                    <Icon.info size={14} />
+                    <span>This browser cannot watch a folder. Use Microsoft Edge or Chrome, and emails will arrive on their own. Otherwise paste them in by hand.</span>
+                  </div>
+                ) : folder?.state === 'watching' ? (
+                  <div className="note ok">
+                    <Icon.check size={14} />
+                    <span>
+                      Watching <b>{folder.name}</b>, checking every 20 seconds. New emails and their photos arrive on their own while the app is open.
+                    </span>
+                  </div>
+                ) : folder?.state === 'needs-permission' ? (
+                  <div className="note warn">
+                    <Icon.info size={14} />
+                    <span>The browser needs you to allow the folder again. It asks once per session, for safety.</span>
+                  </div>
+                ) : (
+                  <p className="small muted" style={{ marginTop: 0 }}>
+                    A Power Automate flow drops each new email from the shared mailbox into a OneDrive folder as a small file, with its photos beside it. Point the app at that folder and they arrive here on their own. Power Automate uses Microsoft's own
+                    connector, so it needs no app registration and nobody's permission: you only need to already have access to the mailbox.
+                  </p>
+                )}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {folder?.state === 'needs-permission' ? (
+                    <button
+                      className="btn primary"
+                      onClick={async () => {
+                        if (await local.resumeFolder()) window.location.reload();
+                        else setMsg({ ok: false, text: 'The browser did not allow the folder. Choose it again below.' });
+                      }}
+                    >
+                      <Icon.folder /> Allow the folder again
+                    </button>
+                  ) : null}
+                  {folder?.state !== 'unsupported' && (
+                    <button
+                      className="btn"
+                      onClick={async () => {
+                        try {
+                          const name = await local.connectFolder();
+                          setMsg({ ok: true, text: `Watching ${name}.` });
+                        } catch (e) {
+                          const m = e instanceof Error ? e.message : String(e);
+                          if (!/abort/i.test(m)) setMsg({ ok: false, text: m });
+                        }
+                      }}
+                    >
+                      <Icon.folder /> {folder?.state === 'watching' ? 'Change folder' : 'Choose the folder'}
+                    </button>
+                  )}
+                  {folder?.state === 'watching' && (
+                    <>
+                      <button
+                        className="btn"
+                        onClick={async () => {
+                          const r = await local.scanNow();
+                          setMsg({ ok: true, text: r.added ? `${r.added} new email(s).` : 'Nothing new in the folder.' });
+                        }}
+                      >
+                        <Icon.refresh /> Check now
+                      </button>
+                      <button className="btn" onClick={async () => { await local.forgetFolder(); window.location.reload(); }}>
+                        Stop watching
+                      </button>
+                    </>
+                  )}
+                </div>
+                <details>
+                  <summary className="small muted" style={{ cursor: 'pointer' }}>How to build the flow (about ten minutes, once)</summary>
+                  <ol style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                    <li>Go to make.powerautomate.com and choose <b>Create › Automated cloud flow</b>.</li>
+                    <li>Trigger: <b>When a new email arrives in a shared mailbox (V2)</b>. Put the shared mailbox address in, folder Inbox, and set <b>Include Attachments</b> to Yes.</li>
+                    <li>Add <b>OneDrive for Business › Create file</b>. Folder: a folder you sync to this PC. File name: <span className="mono">msg-@{'{'}triggerOutputs()?['body/id']{'}'}.json</span> is fussy, so use the expression <span className="mono">concat('msg-', utcNow('yyyyMMddHHmmssfff'), '.json')</span>.</li>
+                    <li>
+                      File content: a JSON object with <span className="mono">subject</span>, <span className="mono">body</span>, <span className="mono">from</span>, <span className="mono">receivedAt</span> and an <span className="mono">attachments</span> list of
+                      file names, filled from the trigger's dynamic content.
+                    </li>
+                    <li>Then <b>Apply to each</b> attachment, with another <b>Create file</b> into the same folder, named <span className="mono">&lt;the same msg- name&gt;__&lt;attachment name&gt;</span>.</li>
+                    <li>Save it, send a test email to the shared mailbox, and press <b>Check now</b> above.</li>
+                  </ol>
+                  <span className="small muted">The exact expressions are in docs/setup.md, which is easier to copy from than this box.</span>
+                </details>
+              </div>
+            )}
             {local && (
               <div className="panel">
                 <h3>The client's template</h3>

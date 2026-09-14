@@ -11,6 +11,7 @@
 // searching the codes, the pricing, the cell map — is the same code that the
 // Microsoft 365 mode uses.
 
+import { type FsDirectoryHandle, askForFolder, folderPermission, pickFolder, scanFolder, supportsFolderWatch } from '../lib/folder';
 import { draftJobFromEmail } from '../lib/match';
 import { idb } from '../lib/store';
 import { buildCellMap, buildQuoteFileName, shortRef } from '../lib/template';
@@ -22,6 +23,8 @@ import type { ChangeEvent, DataProvider, ExportResult, LiveStatus, ProviderSetti
 const KEY_STATE = 'local-state-v1';
 const KEY_CODES = 'local-codes-v1';
 const KEY_SETTINGS = 'local-settings-v1';
+const KEY_FOLDER = 'local-folder-v1';
+const KEY_SEEN = 'local-seen-v1';
 
 export interface LocalSettings extends ProviderSettings {
   /** Shown on the setup screen so you know which template the codes came from. */
@@ -29,6 +32,8 @@ export interface LocalSettings extends ProviderSettings {
   templateLoadedAt?: string;
   userName?: string;
 }
+
+type FolderState = 'off' | 'watching' | 'needs-permission' | 'unsupported';
 
 interface State {
   jobs: Job[];
@@ -51,6 +56,10 @@ export class LocalProvider implements DataProvider {
   private cfg: LocalSettings = DEFAULT_LOCAL_SETTINGS;
   private listeners = new Set<(e: ChangeEvent) => void>();
   private lastSync = new Date().toISOString();
+  private folder: FsDirectoryHandle | null = null;
+  private seen = new Set<string>();
+  private timer: number | undefined;
+  private folderState: FolderState = 'off';
 
   async init(): Promise<void> {
     this.cfg = (await idb.get<LocalSettings>(KEY_SETTINGS)) ?? DEFAULT_LOCAL_SETTINGS;
@@ -58,7 +67,102 @@ export class LocalProvider implements DataProvider {
     const codes = await idb.get<{ codes: SorCode[]; rates: RateAdjustment[] }>(KEY_CODES);
     this.codes = codes?.codes ?? [];
     this.rates = codes?.rates ?? [];
+    this.seen = new Set((await idb.get<string[]>(KEY_SEEN)) ?? []);
+
+    if (!supportsFolderWatch()) {
+      this.folderState = 'unsupported';
+      return;
+    }
+    const saved = await idb.get<FsDirectoryHandle>(KEY_FOLDER);
+    if (!saved) return;
+    this.folder = saved;
+    const perm = await folderPermission(saved);
+    if (perm === 'granted') {
+      this.folderState = 'watching';
+      void this.scanNow();
+      this.timer = window.setInterval(() => void this.scanNow(), 20_000);
+    } else {
+      // The browser needs a click before it will hand the folder back.
+      this.folderState = 'needs-permission';
+    }
   }
+
+  // ---- the watched folder -------------------------------------------------
+
+  folderStatus(): { state: FolderState; name?: string; lastScan?: string } {
+    return { state: this.folderState, name: this.folder?.name, lastScan: this.lastSync };
+  }
+
+  /** Choose the folder the flow writes into. Must be called from a click. */
+  async connectFolder(): Promise<string> {
+    const dir = await pickFolder();
+    this.folder = dir;
+    await idb.set(KEY_FOLDER, dir);
+    this.folderState = 'watching';
+    await this.scanNow();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = window.setInterval(() => void this.scanNow(), 20_000);
+    return dir.name;
+  }
+
+  /** Re-ask for a folder chosen in an earlier session. Must be from a click. */
+  async resumeFolder(): Promise<boolean> {
+    if (!this.folder) return false;
+    const perm = await askForFolder(this.folder);
+    if (perm !== 'granted') return false;
+    this.folderState = 'watching';
+    await this.scanNow();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = window.setInterval(() => void this.scanNow(), 20_000);
+    return true;
+  }
+
+  async forgetFolder(): Promise<void> {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = undefined;
+    this.folder = null;
+    this.folderState = supportsFolderWatch() ? 'off' : 'unsupported';
+    await idb.del(KEY_FOLDER);
+    this.emit({ kind: 'emails' });
+  }
+
+  /**
+   * Read anything new in the folder, add it to the inbox, attach its photos and
+   * run the usual filing. Safe to call as often as you like: each file is
+   * imported once.
+   */
+  async scanNow(): Promise<{ added: number; skipped: string[] }> {
+    if (!this.folder) return { added: 0, skipped: [] };
+    let result;
+    try {
+      result = await scanFolder(this.folder, this.seen);
+    } catch {
+      // Usually the permission lapsed, or the folder was moved or unsynced.
+      this.folderState = 'needs-permission';
+      this.emit({ kind: 'emails' });
+      return { added: 0, skipped: [] };
+    }
+    this.lastSync = new Date().toISOString();
+    for (const stamp of result.seen) this.seen.add(stamp);
+    await idb.set(KEY_SEEN, [...this.seen].slice(-5000));
+
+    if (!result.emails.length) {
+      this.emit({ kind: 'emails' });
+      return { added: 0, skipped: result.skipped };
+    }
+
+    const known = new Set(this.state.emails.map((e) => e.id));
+    const fresh = result.emails.filter((e) => !known.has(e.id));
+    this.state.emails = [...fresh, ...this.state.emails];
+    this.pendingPhotos = result.photos;
+    await this.save();
+    await this.refreshInbox();
+    this.emit({ kind: 'emails', note: fresh.length ? `${fresh.length} new email${fresh.length === 1 ? '' : 's'} from the watched folder` : undefined });
+    return { added: fresh.length, skipped: result.skipped };
+  }
+
+  /** Photos read from the folder, waiting to be attached as their email is filed. */
+  private pendingPhotos = new Map<string, Photo[]>();
 
   me(): User {
     return { name: this.cfg.userName?.trim() || 'You', email: this.cfg.contractorEmail ?? '' };
@@ -191,6 +295,7 @@ export class LocalProvider implements DataProvider {
       updatedBy: this.me().name,
     };
     job = applyEmailToJob(job, email, this.cfg);
+    job = this.withFolderPhotos(job, email.id);
     this.state.jobs = [job, ...this.state.jobs];
     email.jobId = job.id;
     email.matchedBy = 'work-order';
@@ -261,7 +366,8 @@ export class LocalProvider implements DataProvider {
     email.jobId = jobId;
     email.matchedBy = rule;
     email.ignored = false;
-    const next = applyEmailToJob(job, email, this.cfg);
+    let next = applyEmailToJob(job, email, this.cfg);
+    next = this.withFolderPhotos(next, email.id);
     this.state.jobs = this.state.jobs.map((j) => (j.id === jobId ? next : j));
     await this.save();
     this.emit({ kind: 'emails' });
@@ -323,7 +429,7 @@ export class LocalProvider implements DataProvider {
   }
 
   liveStatus(): LiveStatus {
-    return { lastSync: this.lastSync, polling: false, recentEditors: [] };
+    return { lastSync: this.lastSync, polling: this.folderState === 'watching', recentEditors: [] };
   }
 
   /** Everything on this machine, as one file you can keep or move. */
@@ -348,6 +454,16 @@ export class LocalProvider implements DataProvider {
     this.state = { jobs: [], emails: [] };
     await idb.set(KEY_STATE, this.state);
     this.emit({ kind: 'jobs' });
+  }
+
+  /** Move any photos that came in beside this email onto the job. */
+  private withFolderPhotos(job: Job, emailId: string): Job {
+    const found = this.pendingPhotos.get(emailId);
+    if (!found?.length) return job;
+    const photos = [...(job.photos ?? [])];
+    for (const p of found) if (!photos.some((x) => x.id === p.id)) photos.push(p);
+    this.pendingPhotos.delete(emailId);
+    return { ...job, photos };
   }
 
   private emit(e: ChangeEvent) {

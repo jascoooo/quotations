@@ -25,14 +25,55 @@ Open **Setup & data** and choose the client's blank template `.xlsx`. The app re
 
 You should see the number of codes it found. For Sanctuary's V1.0 template that is 3,581 codes and 15 contractor rate rows.
 
-## 4. Work
+## 4. Get the emails arriving on their own
+
+You do not have to paste emails in. Power Automate can pull them out of the shared mailbox for you, and it needs **no app registration and no administrator**: it uses Microsoft's own Outlook connector, which is a standard (non-premium) connector included with the business Microsoft 365 plans. The only requirement is the one you already meet, that your account has full access to the shared mailbox.
+
+The flow drops each new email into a OneDrive folder as a small file, with its photos beside it. That folder syncs to this PC, and the app reads it straight off the disk. Nothing is uploaded and nothing is signed in to.
+
+**Build it once, about ten minutes.** At [make.powerautomate.com](https://make.powerautomate.com), choose **Create › Automated cloud flow**, name it "Quote emails", and pick this trigger:
+
+1. **When a new email arrives in a shared mailbox (V2)**
+   - Mailbox address: the shared mailbox
+   - Folder: Inbox
+   - Include Attachments: **Yes**
+
+2. **Compose**, renamed to `BaseName`, with this expression. It gives the email and its photos a matching name:
+
+   ```
+   concat('msg-', formatDateTime(utcNow(), 'yyyyMMddHHmmssfff'))
+   ```
+
+3. **OneDrive for Business › Create file**
+   - Folder Path: a folder you sync to this PC, for example `/Quote emails`
+   - File Name, as an expression: `concat(outputs('BaseName'), '.json')`
+   - File Content, as an expression: `triggerOutputs()?['body']`
+
+   That last one writes the whole email record, and the app reads Microsoft's own field names, so there is nothing to map by hand.
+
+4. **Apply to each**, over **Attachments** from the trigger, containing one more **OneDrive for Business › Create file**:
+   - Folder Path: the same folder
+   - File Name: `concat(outputs('BaseName'), '__', items('Apply_to_each')?['name'])`
+   - File Content: `items('Apply_to_each')?['contentBytes']`
+
+   The double underscore is what ties a photo to its email.
+
+Save it, then send a test email to the shared mailbox.
+
+**Point the app at the folder.** In **Setup & data**, under "Emails, without signing in", press **Choose the folder** and pick the synced folder. The browser asks once for permission. From then on the app checks every 20 seconds while it is open, adds new emails to the shared inbox, attaches their photos to the right job, and files the certain matches automatically, exactly as the Microsoft 365 version does.
+
+Two things to know. The browser asks for the folder again each session, which is a one-click safety feature and not a fault. And this needs Edge or Chrome: Firefox and Safari have no folder permission, and there the app falls back to pasting emails in.
+
+If Power Automate itself is blocked in your tenant, you will see it as soon as you open the site, and pasting emails in still works.
+
+## 5. Work
 
 - **Add job** on the board starts a job from a work order number.
 - The job page takes the address, the report and the photos. Drop photos straight onto it.
 - **Build quote** works exactly as in the shared version: search the real codes by number or by words, set quantities, and the totals apply your contractor adjustment, including the separate rate above and below £20,000.
-- Emails can be pasted in, and the app still matches them to jobs by work order, purchase order or address. It cannot read the mailbox by itself in this mode.
+- Emails arrive from the watched folder, or can be pasted in. Either way the app matches them to jobs by work order, purchase order or address.
 
-## 5. Getting the spreadsheet out
+## 6. Getting the spreadsheet out
 
 **Export** does not write the file here, because without a sign-in the app has no way to reach your SharePoint. Instead it writes an **Office Script**, which is a small piece of Excel automation that needs no administrator and is included with the business Microsoft 365 plans.
 
@@ -43,11 +84,11 @@ You should see the number of codes it found. For Sanctuary's V1.0 template that 
 
 Excel does the writing, which is the whole point: the dropdowns, the structured tables and the hidden sheets survive, exactly as they would if you typed the values in by hand. A library that re-saved the workbook would quietly drop them.
 
-## 6. Keeping your work safe
+## 7. Keeping your work safe
 
 Everything is in one browser on one PC. Nothing is shared with colleagues and nothing is backed up. In **Setup & data**, **Save a copy** writes the whole board to a file. Keep it on OneDrive or a network drive, and **Load a copy** brings it back, or moves it to another machine.
 
-That is the honest cost of needing no permissions: no live sharing, and no automatic filing overnight. If the app proves itself, the Microsoft 365 route below removes both limits, and it needs one person with an administrator account for about five minutes.
+That is the honest cost of needing no permissions: no live sharing between colleagues, and no filing while the app is shut. The flow keeps collecting emails into the folder regardless; the app takes them in next time it is open. If the app proves itself, the Microsoft 365 route below removes both limits, and it needs one person with an administrator account for about five minutes.
 
 ---
 

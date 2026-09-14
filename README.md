@@ -10,7 +10,14 @@ Everything stays in the company's Microsoft 365 tenant and in the user's browser
 
 ## Run it with no permissions at all
 
-Open the app and choose **Start on this PC**. No sign-in, no Entra app registration, no administrator: you load the client's template once, jobs live in your browser, and the finished quote comes out as an Office Script you run in Excel on the web, so the template's dropdowns and tables survive. `docs/setup.md` has the whole thing.
+Open the app and choose **Start on this PC**. No sign-in, no Entra app registration, no administrator.
+
+- The client's template is read once, locally, for its code list and rate table.
+- Emails arrive on their own: a Power Automate flow (Microsoft's own standard connector, no registration and nobody's permission) drops each one into a synced OneDrive folder, and the app reads that folder off the disk.
+- Jobs live in this browser.
+- The finished quote comes out as an Office Script you run in Excel on the web, so the template's dropdowns and tables survive.
+
+`docs/setup.md` has the whole thing, including the flow.
 
 ## Connect it
 
@@ -40,7 +47,7 @@ Open the app with no `config.json` present and it shows a setup screen: register
 
 ## Layout
 
-- `src/lib/` – the logic: reference extraction (`refs.ts`), how an email finds its job (`match.ts`), the client sheet's maths (`pricing.ts`), SOR search (`sor.ts`), where each value goes in the template (`template.ts`), reading the client's workbook (`xlsx.ts`), and the Office Script the offline mode emits (`officeScript.ts`).
+- `src/lib/` – the logic: reference extraction (`refs.ts`), how an email finds its job (`match.ts`), the client sheet's maths (`pricing.ts`), SOR search (`sor.ts`), where each value goes in the template (`template.ts`), reading the client's workbook (`xlsx.ts`), the watched-folder import (`folder.ts`), and the Office Script the offline mode emits (`officeScript.ts`).
 - `src/providers/` – three data providers behind one interface: `demo.ts` (in memory), `local.ts` (this browser, no sign-in) and `graph.ts` (Microsoft 365 via Microsoft Graph). `autofile.ts` is the filing station they share.
 - `src/ui/` – the screens: board, shared inbox, job pack, quote builder, setup, and the first-run `Connect.tsx`.
 - `docs/` – the guides above, plus the design canvas artboards and screenshots.
