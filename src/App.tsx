@@ -11,9 +11,10 @@ import { Icon } from './ui/bits';
 import { Inbox } from './ui/Inbox';
 import { JobPack } from './ui/JobPack';
 import { QuoteBuilder } from './ui/QuoteBuilder';
+import { Tracker } from './ui/Tracker';
 import { Setup } from './ui/Setup';
 
-export type View = { kind: 'board' } | { kind: 'inbox'; emailId?: string } | { kind: 'job'; id: string } | { kind: 'quote'; id: string } | { kind: 'setup' };
+export type View = { kind: 'board' } | { kind: 'inbox'; emailId?: string } | { kind: 'job'; id: string } | { kind: 'quote'; id: string } | { kind: 'tracker' } | { kind: 'setup' };
 
 interface Toast {
   id: number;
@@ -282,6 +283,11 @@ export function App() {
         <button className={`nav ${view.kind === 'inbox' ? 'active' : ''}`} onClick={() => setView({ kind: 'inbox' })}>
           <Icon.mail /> Shared inbox {needsJob > 0 && <span className="badge">{needsJob}</span>}
         </button>
+        {provider.mode === 'local' && (
+          <button className={`nav ${view.kind === 'tracker' ? 'active' : ''}`} onClick={() => setView({ kind: 'tracker' })}>
+            <Icon.sheet /> Tracker
+          </button>
+        )}
         <button className={`nav ${view.kind === 'setup' ? 'active' : ''}`} onClick={() => setView({ kind: 'setup' })}>
           <Icon.settings /> Setup &amp; data
         </button>
@@ -332,6 +338,14 @@ export function App() {
           <div className="content">
             <div className="empty">That job is no longer on the board.</div>
           </div>
+        )}
+        {view.kind === 'tracker' && provider.mode === 'local' && (
+          <Tracker
+            provider={provider as unknown as import('./providers/local').LocalProvider}
+            jobs={jobs}
+            onOpenJob={(id) => setView({ kind: 'job', id })}
+            onAddJob={(row) => setAdding({ workOrder: row.workOrder, address: row.address, postcode: '', title: row.workType || 'Extra works' })}
+          />
         )}
         {view.kind === 'setup' && <Setup provider={provider} jobs={jobs} emails={emails} sor={sor} rates={rates} config={booted?.config} configSource={booted?.configSource} onReset={() => window.location.reload()} />}
       </main>

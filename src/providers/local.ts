@@ -26,6 +26,7 @@ import {
   folderPermission,
   jobFileName,
   listJson,
+  listWorkbooks,
   pickSharedFolder,
   readJson,
   removeFile,
@@ -38,6 +39,7 @@ import { draftJobFromEmail } from '../lib/match';
 import { idb } from '../lib/store';
 import { buildCellMap, buildQuoteFileName, shortRef } from '../lib/template';
 import type { Email, Job, MatchRule, Photo, Quote, RateAdjustment, SorCode, Stage, User } from '../lib/types';
+import { type Tracker, type TrackerSummary, readTracker, summarise } from '../lib/tracker';
 import { readWorkbook } from '../lib/xlsx';
 import { applyEmailToJob, autoFile } from './autofile';
 import type { ChangeEvent, DataProvider, ExportResult, LiveStatus, ProviderSettings } from './types';
@@ -47,12 +49,17 @@ const KEY_CODES = 'local-codes-v1';
 const KEY_SETTINGS = 'local-settings-v1';
 const KEY_FOLDER = 'local-folder-v1';
 const KEY_SEEN = 'local-seen-v1';
+const KEY_TRACKER = 'local-tracker-v1';
 
 export interface LocalSettings extends ProviderSettings {
   /** Shown on the setup screen so you know which template the codes came from. */
   templateName?: string;
   templateLoadedAt?: string;
   userName?: string;
+  /** Which workbook in the shared folder is the tracker. Newest .xlsx if unset. */
+  trackerFileName?: string;
+  /** Sheets in the tracker to leave alone. */
+  trackerSkipSheets?: string[];
 }
 
 type FolderState = 'off' | 'watching' | 'needs-permission' | 'unsupported';
@@ -94,6 +101,7 @@ export class LocalProvider implements DataProvider {
     this.codes = codes?.codes ?? [];
     this.rates = codes?.rates ?? [];
     this.seen = new Set((await idb.get<string[]>(KEY_SEEN)) ?? []);
+    this.tracker = (await idb.get<typeof this.tracker>(KEY_TRACKER)) ?? null;
 
     if (!supportsFolderWatch()) {
       this.folderState = 'unsupported';
@@ -122,6 +130,7 @@ export class LocalProvider implements DataProvider {
     this.folderState = 'watching';
     await this.pull();
     await this.scanNow();
+    await this.pullTracker();
     if (this.timer) clearInterval(this.timer);
     this.timer = window.setInterval(() => void this.tick(), 10_000);
   }
@@ -129,6 +138,7 @@ export class LocalProvider implements DataProvider {
   private async tick(): Promise<void> {
     await this.pull();
     await this.scanNow();
+    await this.pullTracker();
   }
 
   /**
@@ -198,6 +208,53 @@ export class LocalProvider implements DataProvider {
 
   private recentEditors: string[] = [];
   private ignored = new Set<string>();
+
+  // ---- the office tracker -------------------------------------------------
+
+  private tracker: (Tracker & { fileName: string; readAt: string; source: 'folder' | 'uploaded' }) | null = null;
+  private trackerStamp = 0;
+
+  trackerStatus(): { tracker: Tracker | null; fileName?: string; readAt?: string; source?: 'folder' | 'uploaded'; summary?: TrackerSummary } {
+    if (!this.tracker) return { tracker: null };
+    return { tracker: this.tracker, fileName: this.tracker.fileName, readAt: this.tracker.readAt, source: this.tracker.source, summary: summarise(this.tracker.rows) };
+  }
+
+  /** Read a tracker the user picked by hand. */
+  async loadTrackerFile(file: File): Promise<TrackerSummary> {
+    const parsed = readTracker(new Uint8Array(await file.arrayBuffer()), { skip: this.cfg.trackerSkipSheets ?? ['Wayne Work'] });
+    this.tracker = { ...parsed, fileName: file.name, readAt: new Date().toISOString(), source: 'uploaded' };
+    await idb.set(KEY_TRACKER, this.tracker);
+    this.emit({ kind: 'jobs', note: `Read ${parsed.rows.length} rows from ${file.name}` });
+    return summarise(parsed.rows);
+  }
+
+  /**
+   * Re-read the tracker from the shared folder when it changes. This is the
+   * live part: the office keeps the spreadsheet as they always have, and the
+   * app follows it within a sync.
+   */
+  private async pullTracker(): Promise<void> {
+    if (!this.folder) return;
+    let books;
+    try {
+      books = await listWorkbooks(this.folder);
+    } catch {
+      return;
+    }
+    const named = this.cfg.trackerFileName;
+    const book = named ? books.find((b) => b.name === named) : books[0];
+    if (!book) return;
+    if (book.file.lastModified === this.trackerStamp) return;
+    try {
+      const parsed = readTracker(new Uint8Array(await book.file.arrayBuffer()), { skip: this.cfg.trackerSkipSheets ?? ['Wayne Work'] });
+      this.trackerStamp = book.file.lastModified;
+      this.tracker = { ...parsed, fileName: book.name, readAt: new Date().toISOString(), source: 'folder' };
+      await idb.set(KEY_TRACKER, this.tracker);
+      this.emit({ kind: 'jobs', note: `Tracker updated: ${parsed.rows.length} rows` });
+    } catch {
+      // Being written to right now, or not a tracker at all. Try again later.
+    }
+  }
 
   // ---- the watched folder -------------------------------------------------
 

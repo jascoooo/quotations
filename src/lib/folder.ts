@@ -247,6 +247,17 @@ export async function listJson(dir: SharedDir): Promise<{ name: string; file: Fi
   return out;
 }
 
+/** Every spreadsheet sitting in a folder, newest first. */
+export async function listWorkbooks(dir: SharedDir): Promise<{ name: string; file: File }[]> {
+  const out: { name: string; file: File }[] = [];
+  for await (const entry of dir.values()) {
+    if (entry.kind !== 'file') continue;
+    if (!/\.xlsx$/i.test(entry.name) || entry.name.startsWith('~$')) continue;
+    out.push({ name: entry.name, file: await (entry as FsFileHandle).getFile() });
+  }
+  return out.sort((a, b) => b.file.lastModified - a.file.lastModified);
+}
+
 export async function writeJson(dir: SharedDir, name: string, value: unknown): Promise<void> {
   const handle = await dir.getFileHandle(name, { create: true });
   const w = await handle.createWritable();

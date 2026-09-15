@@ -113,6 +113,108 @@ function readTable(zip: Zip, table: TableRef, strings: string[]): string[][] {
   return rows;
 }
 
+// ---- reading a plain sheet, with its highlighting ------------------------
+
+export interface Cell {
+  value: string;
+  /** The cell's solid fill as RRGGBB, when it has one set directly. */
+  fill?: string;
+}
+
+/** The fill colour of every style, by style index. */
+function fillsByStyle(zip: Zip): (string | undefined)[] {
+  const xml = text(zip, 'xl/styles.xml');
+  if (!xml) return [];
+  const doc = parseXml(xml);
+  const fills: (string | undefined)[] = [];
+  for (const fill of Array.from(doc.getElementsByTagName('fill'))) {
+    const pattern = fill.getElementsByTagName('patternFill')[0];
+    const type = pattern?.getAttribute('patternType');
+    const fg = pattern?.getElementsByTagName('fgColor')[0]?.getAttribute('rgb');
+    // Only a solid fill set as a plain colour counts as a highlight. A theme
+    // colour or no fill at all reads as "not highlighted", which is right:
+    // the tracker's key uses plain colours.
+    fills.push(type && type !== 'none' && fg ? fg.slice(-6).toUpperCase() : undefined);
+  }
+  const cellXfs = doc.getElementsByTagName('cellXfs')[0];
+  return Array.from(cellXfs?.getElementsByTagName('xf') ?? []).map((xf) => fills[Number(xf.getAttribute('fillId') ?? 0)]);
+}
+
+/** Where each sheet's XML lives, by the name on its tab. */
+function sheetPaths(zip: Zip): Map<string, string> {
+  const out = new Map<string, string>();
+  const wb = text(zip, 'xl/workbook.xml');
+  const rels = text(zip, 'xl/_rels/workbook.xml.rels');
+  if (!wb || !rels) return out;
+  const targets = new Map<string, string>();
+  for (const rel of Array.from(parseXml(rels).getElementsByTagName('Relationship'))) {
+    targets.set(rel.getAttribute('Id') ?? '', rel.getAttribute('Target') ?? '');
+  }
+  for (const sheet of Array.from(parseXml(wb).getElementsByTagName('sheet'))) {
+    const name = sheet.getAttribute('name');
+    const id = sheet.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id') ?? sheet.getAttribute('r:id');
+    const target = targets.get(id ?? '');
+    if (name && target) out.set(name, `xl/${target.replace(/^\.\.\//, '').replace(/^\//, '')}`);
+  }
+  return out;
+}
+
+/** The names on the workbook's tabs, in order. */
+export function sheetNames(bytes: Uint8Array): string[] {
+  return [...sheetPaths(unzipSync(bytes) as Zip).keys()];
+}
+
+/**
+ * Read one sheet as a grid of cells, keeping each cell's highlight colour.
+ * Row 0 is the first row of the sheet. Gaps come back as empty cells, so a
+ * row's columns always line up with the header's.
+ */
+export function readSheet(bytes: Uint8Array, wanted: string): Cell[][] {
+  const zip = unzipSync(bytes) as Zip;
+  const paths = sheetPaths(zip);
+  const path = paths.get(wanted) ?? paths.get(wanted.trim()) ?? [...paths.entries()].find(([n]) => n.trim() === wanted.trim())?.[1];
+  if (!path) throw new Error(`No sheet called "${wanted}". This workbook has: ${[...paths.keys()].join(', ')}`);
+  const xml = text(zip, path);
+  if (!xml) throw new Error(`Sheet "${wanted}" is empty.`);
+  const strings = sharedStrings(zip);
+  const styleFills = fillsByStyle(zip);
+  const doc = parseXml(xml);
+
+  const rows: Cell[][] = [];
+  let width = 0;
+  for (const row of Array.from(doc.getElementsByTagName('row'))) {
+    const n = Number(row.getAttribute('r'));
+    if (!n) continue;
+    const cells: Cell[] = [];
+    for (const c of Array.from(row.getElementsByTagName('c'))) {
+      const ref = c.getAttribute('r');
+      if (!ref) continue;
+      const { col } = cellRef(ref);
+      const type = c.getAttribute('t');
+      let value = '';
+      if (type === 'inlineStr') {
+        value = Array.from(c.getElementsByTagName('t'))
+          .map((t) => t.textContent ?? '')
+          .join('');
+      } else {
+        const raw = c.getElementsByTagName('v')[0]?.textContent ?? '';
+        // 's' is an index into the shared strings; 'str' is a formula's own
+        // text result, which the tracker's UPPER() addresses produce.
+        value = type === 's' ? (strings[Number(raw)] ?? '') : raw;
+      }
+      cells[col] = { value: value.trim(), fill: styleFills[Number(c.getAttribute('s') ?? 0)] };
+      width = Math.max(width, col + 1);
+    }
+    rows[n - 1] = cells;
+  }
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r] ?? [];
+    for (let c = 0; c < width; c++) row[c] ??= { value: '' };
+    rows[r] = row;
+  }
+  return rows;
+}
+
 export interface WorkbookData {
   codes: SorCode[];
   rates: RateAdjustment[];

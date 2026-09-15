@@ -88,7 +88,23 @@ If Power Automate itself is blocked in your tenant, you will see it as soon as y
 - **Build quote** works exactly as in the shared version: search the real codes by number or by words, set quantities, and the totals apply your contractor adjustment, including the separate rate above and below £20,000.
 - Emails arrive from the watched folder, or can be pasted in. Either way the app matches them to jobs by work order, purchase order or address.
 
-## 6. Getting the spreadsheet out
+## 6. The office tracker
+
+The app can read the extra-works tracker the office already keeps, so the board is not the only picture of where quotes are. Put the tracker in the shared folder and it is read automatically, and re-read whenever anyone changes it. Otherwise pick the file on the **Tracker** screen to read it once on this PC.
+
+It is only ever read. The app never writes to the spreadsheet.
+
+What it does with it:
+
+- Reads the **KEY sheet** for what each colour means, so if the office re-words or adds a colour the app follows without a change to the app.
+- Treats **Rec'd** as the dividing line. A row with the quote in from whoever attended is ours to act on; a row without it is still with that company, and the app lists who owes what rather than pretending it is on the board.
+- Shows the rows that are **in but carry no colour**: quotes that have come back and nobody has picked up.
+- Lines the tracker up against the board by work order, then purchase order, then address, and flags where the two disagree.
+- **Update the spreadsheet** writes an Office Script that re-colours the rows the board has moved on. You run it in Excel on the web, so Excel does the writing and nothing else in the workbook is touched. Running it twice changes nothing the second time.
+
+Sheets you do not want read, such as a personal one, can be left out.
+
+## 7. Getting the spreadsheet out
 
 **Export** does not write the file here, because without a sign-in the app has no way to reach your SharePoint. Instead it writes an **Office Script**, which is a small piece of Excel automation that needs no administrator and is included with the business Microsoft 365 plans.
 
@@ -99,7 +115,7 @@ If Power Automate itself is blocked in your tenant, you will see it as soon as y
 
 Excel does the writing, which is the whole point: the dropdowns, the structured tables and the hidden sheets survive, exactly as they would if you typed the values in by hand. A library that re-saved the workbook would quietly drop them.
 
-## 7. What this costs you
+## 8. What this costs you
 
 With the shared folder, the board is in SharePoint or OneDrive and is backed up along with everything else there. **Save a copy** in Setup and data still writes the whole board to one file if you want your own.
 

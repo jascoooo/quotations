@@ -16,6 +16,7 @@ Open the app and choose **Start on this PC**. No sign-in, no Entra app registrat
 - Emails arrive on their own: a Power Automate flow (Microsoft's own standard connector, no registration and nobody's permission) drops each one into a synced OneDrive folder, and the app reads that folder off the disk.
 - The board is shared and live: it lives as one file per job in a SharePoint or OneDrive folder synced to each PC, re-read every ten seconds, so colleagues see each other's changes without anyone signing in.
 - The finished quote comes out as an Office Script you run in Excel on the web, so the template's dropdowns and tables survive.
+- The office's own extra-works tracker is read from the same folder, colour key and all, so the board is checked against where the quotes really are.
 
 `docs/setup.md` has the whole thing, including the flow.
 
@@ -47,7 +48,7 @@ Open the app with no `config.json` present and it shows a setup screen: register
 
 ## Layout
 
-- `src/lib/` – the logic: reference extraction (`refs.ts`), how an email finds its job (`match.ts`), the client sheet's maths (`pricing.ts`), SOR search (`sor.ts`), where each value goes in the template (`template.ts`), reading the client's workbook (`xlsx.ts`), the watched-folder import (`folder.ts`), and the Office Script the offline mode emits (`officeScript.ts`).
+- `src/lib/` – the logic: reference extraction (`refs.ts`), how an email finds its job (`match.ts`), the client sheet's maths (`pricing.ts`), SOR search (`sor.ts`), where each value goes in the template (`template.ts`), reading the client's workbook and the office tracker (`xlsx.ts`, `tracker.ts`), the watched-folder import (`folder.ts`), and the Office Script the offline mode emits (`officeScript.ts`).
 - `src/providers/` – three data providers behind one interface: `demo.ts` (in memory), `local.ts` (this browser, no sign-in) and `graph.ts` (Microsoft 365 via Microsoft Graph). `autofile.ts` is the filing station they share.
 - `src/ui/` – the screens: board, shared inbox, job pack, quote builder, setup, and the first-run `Connect.tsx`.
 - `docs/` – the guides above, plus the design canvas artboards and screenshots.
