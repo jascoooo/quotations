@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Email, Job, RateAdjustment, SorCode } from '../lib/types';
-import { type AppConfig, clearStoredConfig, configJson } from '../providers/config';
+import { type AppConfig, clearChosenMode, clearStoredConfig, configJson } from '../providers/config';
 import type { LocalProvider } from '../providers/local';
 import { Provisioner, type Step, createMsal, ensureSignedIn } from '../providers/provision';
 import { SCOPES } from '../providers/scopes';
@@ -18,6 +18,18 @@ interface Props {
   onReset: () => void;
 }
 
+function Done({ on, label, yes, no }: { on: boolean; label: string; yes: string; no: string }) {
+  return (
+    <div className={`step ${on ? 'ok' : 'warn'}`}>
+      <span className="step-mark">{on ? <Icon.check size={14} /> : <Icon.info size={14} />}</span>
+      <div>
+        <b>{label}</b>
+        <span className="step-detail">{on ? yes : no}</span>
+      </div>
+    </div>
+  );
+}
+
 export function Setup({ provider, jobs, emails, sor, rates, config, configSource, onReset }: Props) {
   const me = provider.me();
   const live = provider.liveStatus();
@@ -29,6 +41,8 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const local = provider.mode === 'local' ? (provider as unknown as LocalProvider) : null;
   const folder = local?.folderStatus();
+  const trackerName = local?.trackerStatus().fileName;
+  const trackerSource = local?.trackerStatus().source;
   const ls = local?.localSettings();
   const json = useMemo(() => (config ? configJson(config) : ''), [config]);
 
@@ -76,10 +90,37 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
               <h3>This session</h3>
               <div className="kv" style={{ gridTemplateColumns: '160px 1fr' }}>
                 <span className="k">Version</span><span className="mono">{__BUILD_ID__}</span>
-                <span className="k">Mode</span><span>{provider.mode === 'demo' ? 'Demo: made-up data, no sign-in, nothing leaves this browser' : 'Microsoft 365: your own tenant, via Microsoft Graph'}</span>
+                <span className="k">Mode</span>
+                <span>
+                  {provider.mode === 'demo'
+                    ? 'Demo: made-up data, no sign-in, nothing leaves this browser'
+                    : provider.mode === 'local'
+                      ? 'On this PC: no sign-in, shared through a folder'
+                      : 'Microsoft 365: your own tenant, via Microsoft Graph'}
+                </span>
                 <span className="k">Signed in as</span><span>{me.name}{me.email ? ` · ${me.email}` : ''}</span>
-                <span className="k">Shared with</span><span>{provider.mode === 'demo' ? 'nobody (demo)' : 'everyone in your tenant who can open the SharePoint site'}</span>
-                <span className="k">Settings from</span><span>{configSource === 'browser' ? 'this browser (set up on this machine)' : configSource === 'published' ? 'config.json published with the app' : 'the demo'}</span>
+                <span className="k">Shared with</span>
+                <span>
+                  {provider.mode === 'demo'
+                    ? 'nobody (demo)'
+                    : provider.mode === 'local'
+                      ? folder?.state === 'watching'
+                        ? `everyone pointed at ${folder.name}`
+                        : 'nobody yet: no shared folder chosen'
+                      : 'everyone in your tenant who can open the SharePoint site'}
+                </span>
+                <span className="k">Settings from</span>
+                <span>
+                  {configSource === 'browser'
+                    ? 'this browser (set up on this machine)'
+                    : configSource === 'published'
+                      ? 'config.json published with the app'
+                      : provider.mode === 'local'
+                        ? folder?.state === 'watching'
+                          ? 'the shared folder, so colleagues get the same'
+                          : 'this browser'
+                        : 'the demo'}
+                </span>
                 <span className="k">Last checked</span><span>{live.lastSync ? fmtDateTime(live.lastSync) : '—'}{live.polling ? ' · refreshing automatically' : ''}</span>
                 <span className="k">Recently editing</span><span>{live.recentEditors.length ? live.recentEditors.join(', ') : 'just you'}</span>
                 <span className="k">On the board</span><span>{jobs.length} jobs · {emails.length} emails seen · {sor.length.toLocaleString('en-GB')} SOR codes · {rates.length} contractor rate{rates.length === 1 ? '' : 's'}</span>
@@ -91,11 +132,21 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
                   <button className="btn" onClick={async () => { await provider.signOut(); onReset(); }}>
                     <Icon.refresh /> Reset demo data
                   </button>
-                ) : (
+                ) : local ? null : (
                   <button className="btn" onClick={() => provider.signOut()}>
                     Sign out
                   </button>
                 )}
+                <button
+                  className="btn"
+                  title="Go back to the screen that offers the two ways of running it"
+                  onClick={() => {
+                    clearChosenMode();
+                    window.location.reload();
+                  }}
+                >
+                  <Icon.back /> Change how this runs
+                </button>
                 {configSource === 'browser' && (
                   <button
                     className="btn"
@@ -137,18 +188,44 @@ export function Setup({ provider, jobs, emails, sor, rates, config, configSource
               <h3>
                 <Icon.lock size={15} style={{ color: 'var(--accent)' }} /> Where the data lives
               </h3>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6 }}>
-                <li>The shared mailbox stays in Outlook; the app only reads it on your behalf.</li>
-                <li>Each job is a folder in a SharePoint document library: the emails as files, the photos, the report, the finished quote.</li>
-                <li>The board is a SharePoint list. Every colleague sees the same list; a drag on one screen shows on the others within seconds.</li>
-                <li>The SOR code list and rate table are read from the client's template in that library, never copied out.</li>
-                <li>Matching, searching and pricing run in this browser. No AI service, no third-party server, nothing sent outside your tenant.</li>
-                <li>Filing happens while someone has the app open. For overnight and weekend filing, the companion Power Automate flow (see docs) writes to the same lists and folders.</li>
-              </ul>
+              {local ? (
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                  <li>The board is one small file per job in the shared folder, which SharePoint or OneDrive syncs between everyone. Nothing is uploaded anywhere else.</li>
+                  <li>Photos and emails come from that same folder, put there by the Power Automate flow, and are read off the disk.</li>
+                  <li>The client's code list and rate table are read out of their template and kept in this browser. The template itself is not stored.</li>
+                  <li>The office tracker is only ever read. The app never writes to it: changes go back as a script you run in Excel.</li>
+                  <li>Matching, searching and pricing run in this browser. No sign-in, no AI service, no third-party server.</li>
+                  <li>Without a shared folder, everything stays in this browser on this PC alone.</li>
+                </ul>
+              ) : (
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                  <li>The shared mailbox stays in Outlook; the app only reads it on your behalf.</li>
+                  <li>Each job is a folder in a SharePoint document library: the emails as files, the photos, the report, the finished quote.</li>
+                  <li>The board is a SharePoint list. Every colleague sees the same list; a drag on one screen shows on the others within seconds.</li>
+                  <li>The SOR code list and rate table are read from the client's template in that library, never copied out.</li>
+                  <li>Matching, searching and pricing run in this browser. No AI service, no third-party server, nothing sent outside your tenant.</li>
+                  <li>Filing happens while someone has the app open. For overnight and weekend filing, the companion Power Automate flow (see docs) writes to the same lists and folders.</li>
+                </ul>
+              )}
             </div>
           </div>
 
           <div className="stack">
+            {local && (
+              <div className="panel">
+                <h3>What is connected</h3>
+                <div className="steps">
+                  <Done
+                    on={folder?.state === 'watching'}
+                    label="A shared folder"
+                    yes={`Sharing through ${folder?.name}. Colleagues pointed at the same folder see the same board.`}
+                    no="Not set yet. Without one the board stays on this PC only, and emails have to be pasted in."
+                  />
+                  <Done on={!!ls?.templateName} label="The client's template" yes={`${ls?.templateName}: ${sor.length.toLocaleString('en-GB')} codes and ${rates.length} rate row(s).`} no="Not read yet. The quote builder has no codes to search until it is." />
+                  <Done on={!!trackerName} label="The office tracker" yes={`${trackerName}, read ${trackerSource === 'folder' ? 'from the shared folder' : 'once on this PC'}.`} no="Optional. Read it to see where every quote is, not only the ones on the board." />
+                </div>
+              </div>
+            )}
             {local && (
               <div className="panel">
                 <h3>The shared folder</h3>

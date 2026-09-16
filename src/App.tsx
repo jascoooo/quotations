@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { matchEmail } from './lib/match';
 import type { Email, Job, MatchRule, Quote, RateAdjustment, SorCode, Stage } from './lib/types';
-import { type AppConfig, clearStoredConfig, loadConfig } from './providers/config';
+import { type AppConfig, LOCAL_MODE_KEY, clearStoredConfig, loadConfig } from './providers/config';
 import { diagnose } from './providers/provision';
 import { DemoProvider } from './providers/demo';
 import type { DataProvider, ExportResult } from './providers/types';
@@ -34,11 +34,9 @@ interface Booted {
  * otherwise nothing: the setup screen takes over so the first run is a form
  * rather than a stack trace.
  */
-const LOCAL_CHOSEN = 'quote-desk-local-mode';
-
 async function boot(): Promise<Booted | null> {
   if (DEMO_ONLY || window.location.hash.includes('demo')) return { provider: new DemoProvider() };
-  if (window.location.hash.includes('local') || localStorage.getItem(LOCAL_CHOSEN) === '1') {
+  if (window.location.hash.includes('local') || localStorage.getItem(LOCAL_MODE_KEY) === '1') {
     const { LocalProvider } = await import('./providers/local');
     return { provider: new LocalProvider() };
   }
@@ -207,7 +205,7 @@ export function App() {
         }}
         onLocal={() => {
           try {
-            localStorage.setItem(LOCAL_CHOSEN, '1');
+            localStorage.setItem(LOCAL_MODE_KEY, '1');
           } catch {
             window.location.hash = 'local';
           }
@@ -308,7 +306,13 @@ export function App() {
           <b>
             <Icon.lock size={14} /> Data stays in-house
           </b>
-          <span>{provider.mode === 'demo' ? 'Demo mode: made-up data, nothing leaves this browser.' : 'Emails, photos and quotes live in your Microsoft 365. Nothing is sent to outside services.'}</span>
+          <span>
+            {provider.mode === 'demo'
+              ? 'Demo mode: made-up data, nothing leaves this browser.'
+              : provider.mode === 'local'
+                ? 'Everything stays in your own folder and this browser. Nothing is sent to outside services.'
+                : 'Emails, photos and quotes live in your Microsoft 365. Nothing is sent to outside services.'}
+          </span>
         </div>
       </aside>
 

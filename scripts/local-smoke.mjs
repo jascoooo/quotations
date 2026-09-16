@@ -83,5 +83,16 @@ console.log('7. office script present:', hasScript);
 const cells = modal.match(/Excel writes the (\d+) cells/);
 console.log('8. cells to write:', cells ? cells[1] : 'not stated');
 await p.screenshot({ path: '/tmp/claude-0/local-export.png', fullPage: false });
+// You must be able to get back out of this mode again.
+await p.locator('button', { hasText: 'Setup' }).first().click();
+await p.waitForTimeout(600);
+const deadSignOut = await p.locator('button', { hasText: 'Sign out' }).count();
+console.log('9. dead sign-out button present:', deadSignOut, deadSignOut === 0 ? '(good)' : '(BAD)');
+await p.locator('button', { hasText: 'Change how this runs' }).click();
+await p.waitForTimeout(1500);
+const routes = await p.locator('.choice').count();
+console.log('10. back at the start screen with both routes:', routes === 2 ? 'yes' : `no (${routes})`);
+
 console.log('errors:', bad.length ? bad.slice(0, 5) : 'none');
 await b.close();
+if (deadSignOut !== 0 || routes !== 2) process.exit(1);

@@ -183,8 +183,8 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
             <Icon.sheet size={20} />
           </div>
           <div>
-            <h1>Connect to your Microsoft 365</h1>
-            <p className="sub">A few details, one sign-in, and the app builds the rest for itself. It only ever touches the site and mailbox you name here.</p>
+            <h1>Set up Quote Desk</h1>
+            <p className="sub">Two ways to run it, below. The left-hand one needs nobody's permission; the right-hand one is the Microsoft 365 version and is set up further down this page.</p>
           </div>
         </div>
 

@@ -31,6 +31,19 @@ export interface AppConfig {
 
 export const CONFIG_KEY = 'quote-desk-config-v1';
 export const DRAFT_KEY = 'quote-desk-setup-draft-v1';
+/** Set once someone chooses the on-this-PC route, so the app reopens into it. */
+export const LOCAL_MODE_KEY = 'quote-desk-local-mode';
+
+/** Forget the chosen route, so the app opens on the first screen again. */
+export function clearChosenMode(): void {
+  try {
+    window.localStorage.removeItem(LOCAL_MODE_KEY);
+  } catch {
+    /* nothing stored */
+  }
+  // The hash is the other way a route is chosen, so it has to go too.
+  if (window.location.hash) window.location.hash = '';
+}
 
 const REQUIRED: (keyof AppConfig)[] = ['tenantId', 'clientId', 'sharedMailbox', 'siteId', 'quotesListId', 'inboxListId', 'driveId', 'templateItemId', 'contractor', 'clientName'];
 
