@@ -33,6 +33,11 @@ function readDraft(): Draft {
 }
 
 const REDIRECT_URI = window.location.origin + window.location.pathname;
+// Entra will not accept a file:// address as a single-page-app redirect: it has
+// to be https, or http://localhost. Opening the file straight off the desktop
+// is fine for the on-this-PC route, but the Microsoft 365 route needs the app
+// served from a real address.
+const FROM_FILE = window.location.protocol === 'file:';
 
 export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () => void }) {
   const [draft, setDraft] = useState<Draft>(readDraft);
@@ -226,7 +231,17 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
             </a>{' '}
             choose <b>New registration</b>, name it "Quote Desk", leave it on <b>single tenant</b>, set the platform to <b>Single-page application</b> and paste this page's address as the redirect:
           </p>
-          <pre className="code-block small-block">{REDIRECT_URI}</pre>
+          {FROM_FILE ? (
+            <div className="note warn">
+              <Icon.info />
+              <span>
+                You have opened this file straight from your computer, so there is no web address to register. Microsoft only accepts an <b>https</b> address, or <span className="mono">http://localhost</span>, as a sign-in redirect. Put the file on a
+                Hugging Face Space first (see <span className="mono">docs/hosting.md</span>) and open it from that address, then come back to this step. The on-this-PC route on the left works from a file with no such restriction.
+              </span>
+            </div>
+          ) : (
+            <pre className="code-block small-block">{REDIRECT_URI}</pre>
+          )}
           <p className="small muted">
             Then open <b>API permissions</b> and add the delegated Microsoft Graph permissions <span className="mono">User.Read</span>, <span className="mono">Mail.Read.Shared</span>, <span className="mono">Sites.ReadWrite.All</span>, <span className="mono">Files.ReadWrite.All</span> and <span className="mono">Sites.Manage.All</span>. Copy the Application (client) ID and Directory (tenant) ID from the Overview page into the boxes below. If the New registration button is missing, or sign-in later says "Need admin approval",
             whoever holds your Microsoft 365 admin account has to do that part once — it is two clicks and nothing else.
