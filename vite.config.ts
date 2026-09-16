@@ -8,8 +8,8 @@ import react from '@vitejs/plugin-react';
 const CSP = [
   "default-src 'self'",
   "script-src 'self'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
   "img-src 'self' data: blob: https://graph.microsoft.com https://*.sharepoint.com https://*.sharepointonline.com",
   "connect-src 'self' https://login.microsoftonline.com https://graph.microsoft.com https://*.sharepoint.com https://*.sharepointonline.com",
   "frame-src https://login.microsoftonline.com",

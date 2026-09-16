@@ -42,6 +42,7 @@ Open the app with no `config.json` present and it shows a setup screen: register
 | `npm run build:demo` | single-file demo build into `dist-demo/` (no sign-in, demo data only) |
 | `npm run build:single` | single-file build of the real app into `dist-single/`, for uploading to a static host by hand |
 | `node scripts/local-smoke.mjs` | drives the on-this-PC mode end to end against a real client template |
+| `node scripts/privacy-check.mjs` | logs every host the running app contacts, and fails on anything but Microsoft |
 | `npm test` | unit tests for matching, pricing, SOR search, the template cell map and the setup helpers |
 | `npm run typecheck` | TypeScript |
 | `node scripts/smoke.mjs` | drives the built demo through the main flows in a headless browser |
