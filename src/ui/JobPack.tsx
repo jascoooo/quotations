@@ -88,6 +88,22 @@ export function JobPack({ job, emails, sor, settings, provider, onBack, onUpdate
 
   const rulesUsed = new Set(jobEmails.map((e) => e.matchedBy).filter(Boolean));
   const included = full.photos.filter((p) => p.include).length;
+  const local = provider.mode === 'local' ? (provider as unknown as { addPhotos: (id: string, files: File[]) => Promise<number> }) : null;
+  const [dropping, setDropping] = useState(false);
+  const [openEmail, setOpenEmail] = useState<string | null>(null);
+  const [adding, setAdding] = useState<string | null>(null);
+
+  const takePhotos = async (files: File[]) => {
+    if (!local || !files.length) return;
+    setAdding('Adding…');
+    try {
+      const n = await local.addPhotos(full.id, files);
+      setAdding(n ? null : 'Those were not images.');
+      if (n) await onUpdate(((await provider.getJob(full.id)) ?? full) as Job);
+    } catch (e) {
+      setAdding(e instanceof Error ? e.message : String(e));
+    }
+  };
 
   return (
     <>
@@ -205,7 +221,10 @@ export function JobPack({ job, emails, sor, settings, provider, onBack, onUpdate
                           {fmtDateTime(e.receivedAt)}
                         </span>
                       </div>
-                      <span className="subj">{e.subject}</span>
+                      <button className="subj as-link" onClick={() => setOpenEmail(openEmail === e.id ? null : e.id)} title="Show what it said">
+                        {e.subject}
+                      </button>
+                      {openEmail === e.id && <div className="report-text email-body">{e.bodyText.trim() || '(this email had no text)'}</div>}
                       {e.attachments.length > 0 ? (
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
                           {imgs > 0 && (
@@ -289,6 +308,28 @@ export function JobPack({ job, emails, sor, settings, provider, onBack, onUpdate
                   </a>
                 )}
               </h3>
+              {local && (
+                <label
+                  className={`dropzone ${dropping ? 'over' : ''}`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDropping(true);
+                  }}
+                  onDragLeave={() => setDropping(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDropping(false);
+                    void takePhotos([...e.dataTransfer.files]);
+                  }}
+                >
+                  <Icon.image size={15} />
+                  <span>
+                    Drop photos here, or <b>choose them</b>
+                  </span>
+                  <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={(e) => void takePhotos([...(e.target.files ?? [])])} />
+                  {adding && <em>{adding}</em>}
+                </label>
+              )}
               {full.photos.length ? (
                 <div className="photos">
                   {full.photos.map((p, i) => (
@@ -305,7 +346,7 @@ export function JobPack({ job, emails, sor, settings, provider, onBack, onUpdate
                   ))}
                 </div>
               ) : (
-                <div className="empty">No photos yet. They arrive with the engineer's report.</div>
+                <div className="empty">{local ? 'No photos yet. Drop them above, or they arrive with the engineer\'s report.' : "No photos yet. They arrive with the engineer's report."}</div>
               )}
               <div className="note" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-2)', color: 'var(--text-2)' }}>
                 <Icon.check size={14} />

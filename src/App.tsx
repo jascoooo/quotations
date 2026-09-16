@@ -330,7 +330,16 @@ export function App() {
           />
         )}
         {view.kind === 'inbox' && (
-          <Inbox emails={emails} jobs={jobs} settings={settings} initialEmailId={view.emailId} onFile={fileEmail} onCreate={createJob} onIgnore={ignoreEmail} onRefresh={refreshInbox} onOpenJob={(id) => setView({ kind: 'job', id })} live={live} mode={provider.mode} />
+          <Inbox emails={emails} jobs={jobs} settings={settings} initialEmailId={view.emailId} onFile={fileEmail} onCreate={createJob} onIgnore={ignoreEmail} onRefresh={refreshInbox}
+            onPaste={
+              provider.mode === 'local'
+                ? async (e) => {
+                    await (provider as unknown as { addEmail: (i: { subject: string; body: string; fromName?: string }) => Promise<unknown> }).addEmail(e);
+                    await reload(provider);
+                  }
+                : undefined
+            }
+            onOpenJob={(id) => setView({ kind: 'job', id })} live={live} mode={provider.mode} />
         )}
         {view.kind === 'job' && currentJob && (
           <JobPack job={currentJob} emails={emails} sor={sor} settings={settings} provider={provider} onBack={() => setView({ kind: 'board' })} onUpdate={updateJob} onMove={moveJob} onBuild={(id) => setView({ kind: 'quote', id })} onSaveQuote={saveQuote} />

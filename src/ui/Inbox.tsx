@@ -16,12 +16,15 @@ interface Props {
   onCreate: (emailId: string) => Promise<void>;
   onIgnore: (emailId: string) => Promise<void>;
   onRefresh: () => Promise<void>;
+  /** Present only where emails can be added by hand. */
+  onPaste?: (e: { subject: string; body: string; fromName?: string }) => Promise<void>;
   onOpenJob: (id: string) => void;
 }
 
 type Tab = 'needs' | 'filed' | 'ignored' | 'all';
 
-export function Inbox({ emails, jobs, settings, initialEmailId, live, mode, onFile, onCreate, onIgnore, onRefresh, onOpenJob }: Props) {
+export function Inbox({ emails, jobs, settings, initialEmailId, live, mode, onFile, onCreate, onIgnore, onRefresh, onPaste, onOpenJob }: Props) {
+  const [paste, setPaste] = useState<{ subject: string; body: string; fromName: string } | null>(null);
   const [tab, setTab] = useState<Tab>('needs');
   const [selected, setSelected] = useState<string | undefined>(initialEmailId);
   const [busy, setBusy] = useState(false);
@@ -78,6 +81,11 @@ export function Inbox({ emails, jobs, settings, initialEmailId, live, mode, onFi
           </button>
         </div>
         <div className="spacer" />
+        {onPaste && (
+          <button className="btn" onClick={() => setPaste({ subject: '', body: '', fromName: '' })}>
+            <Icon.plus /> Paste an email
+          </button>
+        )}
         <button className="btn" disabled={busy} onClick={() => act(onRefresh)}>
           <Icon.refresh /> Check now
         </button>
@@ -96,7 +104,11 @@ export function Inbox({ emails, jobs, settings, initialEmailId, live, mode, onFi
               {rows.map((e) => (
                 <Row key={e.id} email={e} match={matches.get(e.id)} jobs={jobs} selected={sel?.id === e.id} onClick={() => setSelected(e.id)} />
               ))}
-              {rows.length === 0 && <div className="empty" style={{ margin: 16 }}>Nothing waiting. Everything has found its job.</div>}
+              {rows.length === 0 && (
+                <div className="empty" style={{ margin: 16 }}>
+                  {emails.length === 0 && onPaste ? 'No emails yet. Paste one in above, or set up the flow so they arrive on their own.' : 'Nothing waiting. Everything has found its job.'}
+                </div>
+              )}
             </div>
             <div className="note" style={{ margin: 12, marginTop: 'auto' }}>
               <Icon.lock size={14} />
@@ -157,6 +169,46 @@ export function Inbox({ emails, jobs, settings, initialEmailId, live, mode, onFi
           </div>
         </div>
       </div>
+      {paste && (
+        <div className="modal-bg" onClick={() => setPaste(null)}>
+          <div className="modal" style={{ width: 'min(620px, 100%)' }} onClick={(e) => e.stopPropagation()}>
+            <h2>Paste an email in</h2>
+            <span className="small muted">
+              Copy the subject and the body out of Outlook. The app reads them the same way it reads one that arrived on its own: it looks for a work order, a purchase order or an address, and files it to the right job. Photos go on the job page.
+            </span>
+            <div className="form-grid">
+              <label className="wide">
+                <span>Subject</span>
+                <input className="input" autoFocus value={paste.subject} placeholder="Extra works request SANC004958 – 31 Cathedral Drive" onChange={(e) => setPaste({ ...paste, subject: e.target.value })} />
+              </label>
+              <label className="wide">
+                <span>The email itself</span>
+                <textarea className="input" rows={9} value={paste.body} placeholder="Paste the whole email here, signature and all." onChange={(e) => setPaste({ ...paste, body: e.target.value })} />
+              </label>
+              <label className="wide">
+                <span>Who it came from (optional)</span>
+                <input className="input" value={paste.fromName} placeholder="Sanctuary, or the engineer's name" onChange={(e) => setPaste({ ...paste, fromName: e.target.value })} />
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button className="btn" onClick={() => setPaste(null)}>
+                Cancel
+              </button>
+              <button
+                className="btn primary"
+                disabled={busy || (!paste.subject.trim() && !paste.body.trim())}
+                onClick={async () => {
+                  const it = paste;
+                  setPaste(null);
+                  await act(() => onPaste!({ subject: it.subject, body: it.body, fromName: it.fromName || undefined }));
+                }}
+              >
+                Add it <Icon.arrow />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -83,6 +83,11 @@ If Power Automate itself is blocked in your tenant, you will see it as soon as y
 
 ## 5. Work
 
+Two ways in, and you do not need the flow to start.
+
+- **Paste an email** in the Shared inbox. Copy the subject and body out of Outlook and paste them in; the app reads them exactly as it reads one that arrived on its own, finds the work order, purchase order or address, and offers to file it or start the job. Click a filed email's subject on the job page to read it again.
+- **Drop photos** straight onto the job page. They are held with the job and go into the shared folder with it.
+
 - **Add job** on the board starts a job from a work order number.
 - The job page takes the address, the report and the photos. Drop photos straight onto it.
 - **Build quote** works exactly as in the shared version: search the real codes by number or by words, set quantities, and the totals apply your contractor adjustment, including the separate rate above and below £20,000.
