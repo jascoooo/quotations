@@ -183,7 +183,27 @@ Two honest limits compared with the Microsoft 365 version:
 - **Sharing is as quick as the sync, not instant.** In practice that is seconds, but it is OneDrive's sync rather than a live connection. If two people edit the same job in the same moment, the later save wins and OneDrive may leave a conflict copy in the folder.
 - **Nothing is filed while everyone's app is shut.** The flow keeps collecting emails into the folder overnight regardless; the app takes them in next time somebody opens it.
 
-Neither needs an administrator to fix. If they start to bite, the Microsoft 365 route below removes both, and needs one person with an admin account for about five minutes. If the app proves itself, the Microsoft 365 route below removes both limits, and it needs one person with an administrator account for about five minutes.
+Neither needs an administrator to fix. If they start to bite, the Microsoft 365 route below removes both, and needs one person with an admin account for about five minutes.
+
+## 9. If you get five minutes with an administrator
+
+Spend it on the four settings below rather than on the app registration. Each one can stop this route dead, none of them is in Entra, and all four are quicker to check than to diagnose later. Nothing here grants the app anything: they are the tenant's own switches, and three of the four are most likely already right.
+
+Hand this list over as it stands.
+
+**1. Power Platform: the data policy.** Power Platform admin center › **Policies › Data policies**. If a policy applies to the environment, **Office 365 Outlook**, **SharePoint** and **OneDrive for Business** must all sit in the **same** group — normally Business. A policy that puts Outlook in Business and SharePoint in Non-business is perfectly ordinary and blocks this flow completely: it cannot be saved at all, with the message _"this flow violates a data loss prevention policy"_. Two minutes, and it is the one most likely to bite.
+
+**2. Microsoft 365: Office Scripts.** Microsoft 365 admin center › **Settings › Org settings › Services › Office Scripts**. It must be on, and "let users share scripts" helps. This is how the finished quote gets written into the client's template: Excel does the writing, from a script the app hands you. If Office Scripts is off, that step has nothing to run. One minute.
+
+Worth knowing it also unlocks an upgrade: with Office Scripts on, the **Excel Online (Business) › Run script** action is a standard connector, so a later flow can run the script itself and the quote is written without anyone pressing anything.
+
+**3. SharePoint: syncing.** SharePoint admin center › **Settings › OneDrive Sync**. "Allow syncing only on computers joined to specific domains" must either be off, or include the PCs you use. The whole shared board depends on that Sync button working. One minute.
+
+**4. Exchange: the shared mailbox.** Exchange admin center › **Recipients › Mailboxes** › the shared mailbox › **Delegation** › **Read and manage (Full Access)**. Whoever builds the flow needs it — only them, not the whole team. You probably have this already; it takes thirty seconds to confirm.
+
+**If there is time left over**, ask them to create a SharePoint site called Quote Desk with you as an owner. That removes the one remaining dependency on your own account, and takes about a minute from the SharePoint admin center.
+
+What is deliberately not on this list is the app registration and its consent. That is the Microsoft 365 route below, and it needs more than the admin's five minutes: the app has to be hosted at an https address and the registration finished first, so it is worth doing properly or not at all.
 
 ---
 
