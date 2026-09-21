@@ -203,7 +203,7 @@ Worth knowing it also unlocks an upgrade: with Office Scripts on, the **Excel On
 
 **If there is time left over**, ask them to create a SharePoint site called Quote Desk with you as an owner. That removes the one remaining dependency on your own account, and takes about a minute from the SharePoint admin center.
 
-What is deliberately not on this list is the app registration and its consent. That is the Microsoft 365 route below, and it needs more than the admin's five minutes: the app has to be hosted at an https address and the registration finished first, so it is worth doing properly or not at all.
+**Or spend the window on the app registration instead.** If you can register an app but cannot change it afterwards, three minutes of administrator finishes the Microsoft 365 route for good, and the order to do it in is under [Spending five minutes of administrator on this](#spending-five-minutes-of-administrator-on-this) below. Which of the two is the better use of the window depends on where you are: the four switches above protect the route that already works, and the registration unlocks a better one that has never been run for real. If the flow is saving and the folder is syncing, the switches are fine and the registration is the more valuable ask.
 
 ---
 
@@ -267,6 +267,39 @@ The "Owned applications" tab, which the page usually opens on, only lists apps w
 Once the registration is open, everything else is in the **Manage** list down the left-hand side: **Authentication** for the redirect address, **API permissions** for the five permissions, **Overview** for the two IDs. If you cannot see that list, the pane is collapsed rather than missing — widen the window, or use the "«" control at the top of it.
 
 **Adding permissions and consenting to them are two different things.** On the API permissions page, **Add a permission** is the button you want, and it is open to the owner of the registration; it builds the list of what the app will ask for. **Grant admin consent for &lt;organisation&gt;** is the button next to it, it is greyed out unless you hold an admin role, and you do not press it to add anything. If it is greyed out, carry on regardless: add the five permissions, then sign in. Consent is asked for at sign-in, and only if that is refused does anyone else have to be involved.
+
+### If the settings are read-only
+
+Being able to register the app but not to change it afterwards is a recognisable state, and it has three possible causes. Work down them in order, because the first two cost nothing and the third is the only one that needs anybody else.
+
+**1. Check which of the two pages you are on.** Every registered app appears twice in the portal, under two different headings, and they are not equally editable:
+
+| Page                                     | What it is                                     | Who can change it   |
+| ---------------------------------------- | ---------------------------------------------- | ------------------- |
+| **App registrations › Quote Desk**       | the definition of the app                      | its **owners**      |
+| **Enterprise applications › Quote Desk** | the copy of it that is installed in the tenant | administrators only |
+
+Enterprise applications has a **Permissions** page that looks like the one you want and is read-only to everyone but an admin. The editable one is **App registrations › Quote Desk › Manage › API permissions**, where **Add a permission** is a live button. Landing on the wrong one is the most common version of this problem.
+
+**2. Check you are an owner.** In the registration, **Manage › Owners**. You should be listed: Entra normally records whoever creates an app as its owner. If you are not there, that is the whole explanation — without it the pages are read-only no matter what else is true.
+
+**3. If you are an owner, on the right page, and it is still read-only**, your tenant has restricted it, and only an administrator can change the registration from here.
+
+### Spending five minutes of administrator on this
+
+If you can get a short window with whoever holds the admin account, this is the order that gets the most out of it. It matters that permissions are added **before** consent is granted: consent covers the permissions that exist at the moment it is pressed, and one added afterwards needs a fresh press.
+
+Do this first, before the window, so nothing is waiting on you during it: get the app onto its https address and have that address on the clipboard.
+
+1. **Owners › Add owner › you.** Thirty seconds, and it is the highest-value part: from then on every future change to this registration is yours to make, and no further admin is needed for anything except step 3.
+2. **API permissions › Add a permission › Microsoft Graph › Delegated permissions** — the five in the table above. Two minutes. You can do this yourself the moment step 1 lands, while they wait.
+3. **Grant admin consent for &lt;organisation&gt; › Yes.** Twenty seconds, and the only step that genuinely cannot be done by anyone else.
+
+**Authentication › Add a platform › Single-page application** and the redirect address you can add yourself afterwards, as an owner; redirect addresses are not part of consent, so adding one later breaks nothing.
+
+That is about three minutes of their time and it finishes the Microsoft 365 route permanently.
+
+**Be aware of what you are betting on.** The on-this-PC route is tested and working. The Microsoft 365 route is written and unit-tested but has never been run against a real tenant, so expect to spend an hour on first-run problems. Keep the shared folder and the flow in place until the Microsoft 365 version has filed a real quote, and you have lost nothing either way.
 
 ## Step 2. Have a SharePoint site (two minutes, you)
 
