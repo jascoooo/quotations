@@ -42,44 +42,98 @@ You should see the number of codes it found. For Sanctuary's V1.0 template that 
 
 ## 4. Get the emails arriving on their own
 
-You do not have to paste emails in. Power Automate can pull them out of the shared mailbox for you, and it needs **no app registration and no administrator**: it uses Microsoft's own Outlook connector, which is a standard (non-premium) connector included with the business Microsoft 365 plans. The only requirement is the one you already meet, that your account has full access to the shared mailbox.
+You do not have to paste emails in. Power Automate can pull them out of the shared mailbox for you, and it needs **no app registration and no administrator**: it uses Microsoft's own Office 365 Outlook connector, which is a standard (non-premium) connector included with the business Microsoft 365 plans. The only requirement is the one you already meet, that your account has full access to the shared mailbox.
 
-The flow drops each new email into a OneDrive folder as a small file, with its photos beside it. That folder syncs to this PC, and the app reads it straight off the disk. Nothing is uploaded and nothing is signed in to.
+The flow drops each new email into the shared folder as a small file, with its photos beside it. That folder syncs to every PC, and each app reads it straight off the disk. Nothing is uploaded to anyone else and nothing is signed in to.
 
-**Build it once, about ten minutes.** At [make.powerautomate.com](https://make.powerautomate.com), choose **Create › Automated cloud flow**, name it "Quote emails", and pick this trigger:
+### 4a. Put the shared folder somewhere everyone syncs
 
-1. **When a new email arrives in a shared mailbox (V2)**
-   - Mailbox address: the shared mailbox
-   - Folder: Inbox
-   - Include Attachments: **Yes**
+Do this before building the flow, because the flow needs somewhere to write to.
 
-2. **Compose**, renamed to `BaseName`, with this expression. It gives the email and its photos a matching name:
+The folder can live in OneDrive, but a **SharePoint document library** is better for a team: it belongs to the company rather than to one person, and it survives that person leaving. Any site you can already open will do.
 
-   ```
-   concat('msg-', formatDateTime(utcNow(), 'yyyyMMddHHmmssfff'))
-   ```
+1. Open the SharePoint site, go to **Documents**, and press **New › Folder**. Call it `Quote Desk`.
+2. Press **Sync** at the top of the library. That puts it under your PC's **OneDrive - \<company\>** in File Explorer. Every colleague presses Sync once too, on their own PC.
+3. Open the app, go to **Setup & data**, and press **Choose the shared folder**. Pick `Quote Desk` in File Explorer.
 
-3. **OneDrive for Business › Create file**
-   - Folder Path: a folder you sync to this PC, for example `/Quote emails`
-   - File Name, as an expression: `concat(outputs('BaseName'), '.json')`
-   - File Content, as an expression: `triggerOutputs()?['body']`
+That last step creates the two folders the app uses, so they exist before the flow looks for them:
 
-   That last one writes the whole email record, and the app reads Microsoft's own field names, so there is nothing to map by hand.
+```
+Quote Desk/
+  emails/     the flow writes each new email here
+  jobs/       the board, one small file per job, written by the app
+  settings.json
+```
 
-4. **Apply to each**, over **Attachments** from the trigger, containing one more **OneDrive for Business › Create file**:
-   - Folder Path: the same folder
-   - File Name: `concat(outputs('BaseName'), '__', items('Apply_to_each')?['name'])`
-   - File Content: `items('Apply_to_each')?['contentBytes']`
+The flow writes into **`emails`**, not into `Quote Desk` itself. Files dropped in the wrong place are simply never seen, with no error anywhere, so it is worth checking twice.
 
-   The double underscore is what ties a photo to its email.
+### 4b. Build the flow (about ten minutes, once)
 
-Save it, then send a test email to the shared mailbox.
+At [make.powerautomate.com](https://make.powerautomate.com), choose **Create › Automated cloud flow**, name it "Quote emails", and search the triggers for "shared mailbox".
 
-**Point the app at the folder.** In **Setup & data**, under "The shared folder", press **Choose the shared folder** and pick it in File Explorer. Every colleague does the same, once, on their own PC. The browser asks once for permission. From then on the app checks every ten seconds while it is open: it picks up jobs colleagues have changed, adds new emails to the shared inbox, attaches their photos to the right job, and files the certain matches automatically, exactly as the Microsoft 365 version does.
+**1. Trigger: When a new email arrives in a shared mailbox (V2)**
 
-Two things to know. The browser asks for the folder again each session, which is a one-click safety feature and not a fault. And this needs Edge or Chrome: Firefox and Safari have no folder permission, and there the app falls back to pasting emails in.
+- Mailbox address: the shared mailbox, exactly as it appears in Outlook
+- Folder: `Inbox`
+- Show advanced options → **Include Attachments: Yes**
 
-If Power Automate itself is blocked in your tenant, you will see it as soon as you open the site, and pasting emails in still works.
+**2. Compose** — press **New step**, search for Compose, and rename the action to exactly `BaseName` (no space; the name is used in the expressions below). In its Inputs box paste this expression:
+
+```
+concat('msg-', utcNow('yyyyMMddHHmmssfff'))
+```
+
+This gives the email and its photos one matching name. It exists because `utcNow()` would give a slightly different answer each time it was used, and the photos would no longer match their email.
+
+**3. SharePoint › Create file** — the email itself.
+
+- Site Address: your site
+- Folder Path: `/Shared Documents/Quote Desk/emails`
+- File Name, as an expression: `concat(outputs('BaseName'), '.json')`
+- File Content, as an expression: `triggerOutputs()?['body']`
+
+That last expression writes the whole email record as the connector gives it. The app reads Microsoft's own field names — `subject`, `body`, `from`, `to`, `receivedDateTime`, `attachments` — so there is nothing to map by hand and nothing to keep in step later.
+
+**4. Apply to each** — the photos. Press **New step › Apply to each**, and in "Select an output" pick **Attachments** from the trigger.
+
+Inside the loop, add a **Condition** first: left side **Is Inline** (from the attachment's dynamic content), `is equal to`, right side the expression `false`. This is what keeps signature logos and email footers out of your job photos. If "Is Inline" is not offered, skip the condition — the app lets you untick a photo before it goes on the quote.
+
+In the **If yes** branch, add another **SharePoint › Create file**:
+
+- Site Address and Folder Path: the same as above
+- File Name: insert the expression `outputs('BaseName')`, then type `__` after it, then insert the dynamic content **Name** from the attachment
+- File Content: the dynamic content **Content Bytes**
+
+The double underscore is what ties a photo to its email. If the file-name box will not take a mixed expression, use this single expression instead: `concat(outputs('BaseName'), '__', items('Apply_to_each')?['name'])`.
+
+Press **Save**.
+
+### 4c. Test it
+
+Send an email to the shared mailbox with a photo attached, and give it a subject like `Extra works SANC004958 — 12 Example Road`.
+
+1. In Power Automate, open the flow and look at **28-day run history**. A run should appear within a minute or two, all ticks.
+2. In File Explorer, open `Quote Desk\emails`. You should see `msg-<numbers>.json` and `msg-<numbers>__yourphoto.jpg`.
+3. In the app, go to **Setup & data** and press **Check now**, or just wait — it looks every ten seconds. The email appears in the **Shared inbox**, matched to the work order.
+
+**If nothing arrives**, work down this list:
+
+| What you see                                      | What it means                                                                                                                                          |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| No run in the history at all                      | The trigger is not firing. Check the mailbox address, and that the folder is Inbox. Shared-mailbox triggers poll, so give it a few minutes.            |
+| The run failed on the first Create file           | Usually the folder path. It must end in `/emails`, and the folder has to exist already.                                                                |
+| Files are in the folder but the app shows nothing | The app is watching the parent, not the same folder the flow writes into, or the browser lost the folder permission. Press **Allow the folder again**. |
+| The email arrives with no photos                  | Include Attachments was left off in the trigger, or the photos were sent as links rather than attachments.                                             |
+| Photos arrive but are logos                       | The Is Inline condition is missing. Add it, or untick them on the job.                                                                                 |
+| The app says a file was skipped                   | It names the file and the reason. Almost always the File Content expression was typed as text instead of being inserted as an expression.              |
+
+**Point every colleague's app at the folder.** Each person presses **Choose the shared folder** once on their own PC and picks the same synced folder. The browser asks for permission once per session, which is a safety feature rather than a fault. From then on each app checks every ten seconds: it picks up jobs colleagues have changed, adds new emails to the shared inbox, attaches their photos to the right job, and files the certain matches automatically.
+
+This needs Edge or Chrome. Firefox and Safari have no folder permission, and there the app falls back to pasting emails in.
+
+The flow is one flow for the whole team, not one each. Only the person who builds it needs access to the shared mailbox; everybody else just reads the folder.
+
+If Power Automate itself is switched off in your tenant, you find out as soon as you open the site, and pasting emails in still works.
 
 ## 5. Work
 
