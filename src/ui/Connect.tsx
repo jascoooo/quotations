@@ -2,25 +2,39 @@
 // front of it, using their own Microsoft account. No administrator, and nothing
 // created outside the one SharePoint site.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type AppConfig, DRAFT_KEY, configJson, missingKeys, saveStoredConfig, withDefaults } from '../providers/config';
-import { Provisioner, type ProvisionInput, type Step, createMsal, diagnose, ensureSignedIn } from '../providers/provision';
-import { SETUP_SCOPES } from '../providers/scopes';
-import { Icon } from './bits';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type AppConfig,
+  DRAFT_KEY,
+  configJson,
+  missingKeys,
+  saveStoredConfig,
+  withDefaults,
+} from "../providers/config";
+import {
+  Provisioner,
+  type ProvisionInput,
+  type Step,
+  createMsal,
+  diagnose,
+  ensureSignedIn,
+} from "../providers/provision";
+import { SETUP_SCOPES } from "../providers/scopes";
+import { Icon } from "./bits";
 
-type Draft = Omit<ProvisionInput, 'templateFile'>;
+type Draft = Omit<ProvisionInput, "templateFile">;
 
 const BLANK: Draft = {
-  tenantId: '',
-  clientId: '',
-  siteUrl: '',
-  sharedMailbox: '',
-  jobsRootFolder: 'Jobs',
-  contractor: '',
-  contractorEmail: '',
-  clientName: '',
-  clientDomains: '',
-  ownDomains: '',
+  tenantId: "",
+  clientId: "",
+  siteUrl: "",
+  sharedMailbox: "",
+  jobsRootFolder: "Jobs",
+  contractor: "",
+  contractorEmail: "",
+  clientName: "",
+  clientDomains: "",
+  ownDomains: "",
 };
 
 function readDraft(): Draft {
@@ -37,12 +51,18 @@ const REDIRECT_URI = window.location.origin + window.location.pathname;
 // to be https, or http://localhost. Opening the file straight off the desktop
 // is fine for the on-this-PC route, but the Microsoft 365 route needs the app
 // served from a real address.
-const FROM_FILE = window.location.protocol === 'file:';
+const FROM_FILE = window.location.protocol === "file:";
 
-export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () => void }) {
+export function Connect({
+  onDemo,
+  onLocal,
+}: {
+  onDemo: () => void;
+  onLocal: () => void;
+}) {
   const [draft, setDraft] = useState<Draft>(readDraft);
   const [account, setAccount] = useState<string | null>(null);
-  const [busy, setBusy] = useState<'signin' | 'run' | null>(null);
+  const [busy, setBusy] = useState<"signin" | "run" | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
   const [done, setDone] = useState<AppConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -79,13 +99,23 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
     })();
   }, []);
 
-  const ready = draft.tenantId.trim() && draft.clientId.trim() && draft.siteUrl.trim() && draft.sharedMailbox.trim() && draft.contractor.trim() && draft.clientName.trim();
+  const ready =
+    draft.tenantId.trim() &&
+    draft.clientId.trim() &&
+    draft.siteUrl.trim() &&
+    draft.sharedMailbox.trim() &&
+    draft.contractor.trim() &&
+    draft.clientName.trim();
 
   const signIn = async () => {
     setError(null);
-    setBusy('signin');
+    setBusy("signin");
     try {
-      const msal = createMsal(draft.tenantId.trim(), draft.clientId.trim(), REDIRECT_URI);
+      const msal = createMsal(
+        draft.tenantId.trim(),
+        draft.clientId.trim(),
+        REDIRECT_URI,
+      );
       msalRef.current = msal;
       const acct = await ensureSignedIn(msal);
       if (acct) {
@@ -93,7 +123,10 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
         setBusy(null);
         return;
       }
-      await msal.loginRedirect({ scopes: SETUP_SCOPES, redirectUri: REDIRECT_URI });
+      await msal.loginRedirect({
+        scopes: SETUP_SCOPES,
+        redirectUri: REDIRECT_URI,
+      });
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
       setError(diagnose(m) ?? m);
@@ -105,7 +138,7 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
     const msal = msalRef.current;
     if (!msal) return;
     setError(null);
-    setBusy('run');
+    setBusy("run");
     setSteps([]);
     try {
       const p = new Provisioner(msal);
@@ -120,7 +153,9 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
       });
       const missing = missingKeys(partial);
       if (missing.length) {
-        setError(`Setup stopped before it finished. Still missing: ${missing.join(', ')}. Fix the failed step above and press Set up again.`);
+        setError(
+          `Setup stopped before it finished. Still missing: ${missing.join(", ")}. Fix the failed step above and press Set up again.`,
+        );
       } else {
         const cfg = withDefaults(partial);
         saveStoredConfig(cfg);
@@ -133,7 +168,7 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
     setBusy(null);
   };
 
-  const json = useMemo(() => (done ? configJson(done) : ''), [done]);
+  const json = useMemo(() => (done ? configJson(done) : ""), [done]);
 
   if (done) {
     return (
@@ -145,17 +180,25 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
             </span>
             <div>
               <h1>Connected</h1>
-              <p className="sub">The board, the filing list and the job folders are ready on your SharePoint site. These settings are saved in this browser, so this machine is set up.</p>
+              <p className="sub">
+                The board, the filing list and the job folders are ready on your
+                SharePoint site. These settings are saved in this browser, so
+                this machine is set up.
+              </p>
             </div>
           </div>
           <div className="panel">
             <h3>To set everyone else up in one go</h3>
             <p className="small muted" style={{ marginTop: 0 }}>
-              Save the text below as <span className="mono">public/config.json</span> in the code repository and push it. From then on anyone who opens the app is connected straight away and nobody repeats this setup. Nothing here is secret: it is a set of
-              addresses and identifiers, and every person still signs in as themselves.
+              Save the text below as{" "}
+              <span className="mono">public/config.json</span> in the code
+              repository and push it. From then on anyone who opens the app is
+              connected straight away and nobody repeats this setup. Nothing
+              here is secret: it is a set of addresses and identifiers, and
+              every person still signs in as themselves.
             </p>
             <pre className="code-block">{json}</pre>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: "flex", gap: 8 }}>
               <button
                 className="btn"
                 onClick={async () => {
@@ -168,9 +211,12 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
                   }
                 }}
               >
-                <Icon.file /> {copied ? 'Copied' : 'Copy config.json'}
+                <Icon.file /> {copied ? "Copied" : "Copy config.json"}
               </button>
-              <button className="btn primary" onClick={() => window.location.reload()}>
+              <button
+                className="btn primary"
+                onClick={() => window.location.reload()}
+              >
                 Open the quote board <Icon.arrow />
               </button>
             </div>
@@ -189,14 +235,22 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
           </div>
           <div>
             <h1>Set up Quote Desk</h1>
-            <p className="sub">Two ways to run it, below. The left-hand one needs nobody's permission; the right-hand one is the Microsoft 365 version and is set up further down this page.</p>
+            <p className="sub">
+              Two ways to run it, below. The left-hand one needs nobody's
+              permission; the right-hand one is the Microsoft 365 version and is
+              set up further down this page.
+            </p>
           </div>
         </div>
 
         <div className="note">
           <Icon.info />
           <span>
-            Want to look around first? <button className="linkbtn" onClick={onDemo}>Open it with example data</button> — made-up jobs, no sign-in, nothing leaves this browser.
+            Want to look around first?{" "}
+            <button className="linkbtn" onClick={onDemo}>
+              Open it with example data
+            </button>{" "}
+            — made-up jobs, no sign-in, nothing leaves this browser.
           </span>
         </div>
 
@@ -206,7 +260,10 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
             <div className="choice">
               <b>On this PC</b>
               <p>
-                No sign-in, no app registration, nobody's permission needed. You load the client's template once, keep jobs in this browser, and the finished quote comes out as a script you run in Excel on the web. Emails and photos are added by hand.
+                No sign-in, no app registration, nobody's permission needed. You
+                load the client's template once, keep jobs in this browser, and
+                the finished quote comes out as a script you run in Excel on the
+                web. Emails and photos are added by hand.
               </p>
               <button className="btn primary" onClick={onLocal}>
                 Start on this PC <Icon.arrow />
@@ -215,9 +272,15 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
             <div className="choice">
               <b>Microsoft 365</b>
               <p>
-                The shared version: the board is live for everyone, the shared mailbox files itself, and the app writes the spreadsheet into SharePoint. It needs an app registration in your directory, which is set up below.
+                The shared version: the board is live for everyone, the shared
+                mailbox files itself, and the app writes the spreadsheet into
+                SharePoint. It needs an app registration in your directory,
+                which is set up below.
               </p>
-              <span className="small muted">If the registration page is not open to you, use the left-hand option. Microsoft has no way around that one.</span>
+              <span className="small muted">
+                If the registration page is not open to you, use the left-hand
+                option. Microsoft has no way around that one.
+              </span>
             </div>
           </div>
         </div>
@@ -225,26 +288,61 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
         <div className="panel">
           <h3>1. The app registration</h3>
           <p className="small muted" style={{ marginTop: 0 }}>
-            This is the one thing that exists outside the app: a name for it in your own directory, so Microsoft knows what is asking to sign you in. At{' '}
-            <a href="https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/CreateApplicationBlade" target="_blank" rel="noreferrer">
+            This is the one thing that exists outside the app: a name for it in
+            your own directory, so Microsoft knows what is asking to sign you
+            in. At{" "}
+            <a
+              href="https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/CreateApplicationBlade"
+              target="_blank"
+              rel="noreferrer"
+            >
               entra.microsoft.com
-            </a>{' '}
-            choose <b>New registration</b>, name it "Quote Desk", leave it on <b>single tenant</b>, set the platform to <b>Single-page application</b> and paste this page's address as the redirect:
+            </a>{" "}
+            choose <b>New registration</b>, name it "Quote Desk", leave it on{" "}
+            <b>single tenant</b>, set the platform to{" "}
+            <b>Single-page application</b> and paste this page's address as the
+            redirect:
           </p>
           {FROM_FILE ? (
             <div className="note warn">
               <Icon.info />
               <span>
-                You have opened this file straight from your computer, so there is no web address to register. Microsoft only accepts an <b>https</b> address, or <span className="mono">http://localhost</span>, as a sign-in redirect. Put the file on a
-                Hugging Face Space first (see <span className="mono">docs/hosting.md</span>) and open it from that address, then come back to this step. The on-this-PC route on the left works from a file with no such restriction.
+                You have opened this file straight from your computer, so there
+                is no web address to register. Microsoft only accepts an{" "}
+                <b>https</b> address, or{" "}
+                <span className="mono">http://localhost</span>, as a sign-in
+                redirect. Put the file on a Hugging Face Space first (see{" "}
+                <span className="mono">docs/hosting.md</span>) and open it from
+                that address, then come back to this step. The on-this-PC route
+                on the left works from a file with no such restriction.
               </span>
             </div>
           ) : (
             <pre className="code-block small-block">{REDIRECT_URI}</pre>
           )}
           <p className="small muted">
-            Then open <b>API permissions</b> and add the delegated Microsoft Graph permissions <span className="mono">User.Read</span>, <span className="mono">Mail.Read.Shared</span>, <span className="mono">Sites.ReadWrite.All</span>, <span className="mono">Files.ReadWrite.All</span> and <span className="mono">Sites.Manage.All</span>. Copy the Application (client) ID and Directory (tenant) ID from the Overview page into the boxes below. If the New registration button is missing, or sign-in later says "Need admin approval",
-            whoever holds your Microsoft 365 admin account has to do that part once — it is two clicks and nothing else.
+            To find it again on a later visit, the portal does not take you back
+            to it: go to <b>Applications › App registrations</b> and switch to
+            the <b>All applications</b> tab, which lists it whether or not you
+            were recorded as its owner. Open it, and everything else is in the{" "}
+            <b>Manage</b> list down the left-hand side. If you registered it
+            twice, keep one and press Delete on the other — only one of them
+            will be the ID you paste below.
+          </p>
+          <p className="small muted">
+            Under <b>API permissions</b> press{" "}
+            <b>Add a permission › Microsoft Graph › Delegated permissions</b>{" "}
+            and add <span className="mono">User.Read</span>,{" "}
+            <span className="mono">Mail.Read.Shared</span>,{" "}
+            <span className="mono">Sites.ReadWrite.All</span>,{" "}
+            <span className="mono">Files.ReadWrite.All</span> and{" "}
+            <span className="mono">Sites.Manage.All</span>. Adding them is open
+            to you as the owner. The <b>Grant admin consent</b> button beside it
+            is a different thing and is greyed out unless you hold an admin role
+            — leave it alone and carry on: consent is asked for when you sign
+            in. Then copy the Application (client) ID and Directory (tenant) ID
+            from <b>Overview</b> into the boxes below. Only if sign-in says
+            "Need admin approval" does anyone else have to press anything, once.
           </p>
         </div>
 
@@ -253,53 +351,128 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
           <div className="form-grid">
             <label>
               <span>Directory (tenant) ID</span>
-              <input className="input mono" value={draft.tenantId} onChange={(e) => set('tenantId', e.target.value)} placeholder="00000000-0000-0000-0000-000000000000" spellCheck={false} />
+              <input
+                className="input mono"
+                value={draft.tenantId}
+                onChange={(e) => set("tenantId", e.target.value)}
+                placeholder="00000000-0000-0000-0000-000000000000"
+                spellCheck={false}
+              />
             </label>
             <label>
               <span>Application (client) ID</span>
-              <input className="input mono" value={draft.clientId} onChange={(e) => set('clientId', e.target.value)} placeholder="00000000-0000-0000-0000-000000000000" spellCheck={false} />
+              <input
+                className="input mono"
+                value={draft.clientId}
+                onChange={(e) => set("clientId", e.target.value)}
+                placeholder="00000000-0000-0000-0000-000000000000"
+                spellCheck={false}
+              />
             </label>
             <label className="wide">
               <span>SharePoint site address</span>
-              <input className="input" value={draft.siteUrl} onChange={(e) => set('siteUrl', e.target.value)} placeholder="https://yourcompany.sharepoint.com/sites/Quotes" spellCheck={false} />
-              <em>Any site you own. Open it in SharePoint and copy the address bar. If you have not got one, press Create site on the SharePoint start page first.</em>
+              <input
+                className="input"
+                value={draft.siteUrl}
+                onChange={(e) => set("siteUrl", e.target.value)}
+                placeholder="https://yourcompany.sharepoint.com/sites/Quotes"
+                spellCheck={false}
+              />
+              <em>
+                Any site you own. Open it in SharePoint and copy the address
+                bar. If you have not got one, press Create site on the
+                SharePoint start page first.
+              </em>
             </label>
             <label className="wide">
               <span>Shared mailbox address</span>
-              <input className="input" value={draft.sharedMailbox} onChange={(e) => set('sharedMailbox', e.target.value)} placeholder="quotes@yourcompany.co.uk" spellCheck={false} />
-              <em>The mailbox the client's requests arrive in. You need to already see it in Outlook; the app reads it as you and never changes anything in it.</em>
+              <input
+                className="input"
+                value={draft.sharedMailbox}
+                onChange={(e) => set("sharedMailbox", e.target.value)}
+                placeholder="quotes@yourcompany.co.uk"
+                spellCheck={false}
+              />
+              <em>
+                The mailbox the client's requests arrive in. You need to already
+                see it in Outlook; the app reads it as you and never changes
+                anything in it.
+              </em>
             </label>
             <label>
               <span>Your company name</span>
-              <input className="input" value={draft.contractor} onChange={(e) => set('contractor', e.target.value)} placeholder="R Dunham" />
+              <input
+                className="input"
+                value={draft.contractor}
+                onChange={(e) => set("contractor", e.target.value)}
+                placeholder="R Dunham"
+              />
             </label>
             <label>
               <span>Client name</span>
-              <input className="input" value={draft.clientName} onChange={(e) => set('clientName', e.target.value)} placeholder="Sanctuary" />
+              <input
+                className="input"
+                value={draft.clientName}
+                onChange={(e) => set("clientName", e.target.value)}
+                placeholder="Sanctuary"
+              />
             </label>
             <label>
               <span>Client email domains</span>
-              <input className="input" value={draft.clientDomains} onChange={(e) => set('clientDomains', e.target.value)} placeholder="sanctuary-housing.co.uk" spellCheck={false} />
-              <em>Used to tell the client's emails from your own. Separate several with commas.</em>
+              <input
+                className="input"
+                value={draft.clientDomains}
+                onChange={(e) => set("clientDomains", e.target.value)}
+                placeholder="sanctuary-housing.co.uk"
+                spellCheck={false}
+              />
+              <em>
+                Used to tell the client's emails from your own. Separate several
+                with commas.
+              </em>
             </label>
             <label>
               <span>Your own email domains</span>
-              <input className="input" value={draft.ownDomains} onChange={(e) => set('ownDomains', e.target.value)} placeholder="rdunham.co.uk" spellCheck={false} />
+              <input
+                className="input"
+                value={draft.ownDomains}
+                onChange={(e) => set("ownDomains", e.target.value)}
+                placeholder="rdunham.co.uk"
+                spellCheck={false}
+              />
             </label>
             <label>
               <span>Folder for job files</span>
-              <input className="input" value={draft.jobsRootFolder} onChange={(e) => set('jobsRootFolder', e.target.value)} placeholder="Jobs" />
+              <input
+                className="input"
+                value={draft.jobsRootFolder}
+                onChange={(e) => set("jobsRootFolder", e.target.value)}
+                placeholder="Jobs"
+              />
               <em>Created inside the site's Documents library.</em>
             </label>
             <label>
               <span>Your email (optional)</span>
-              <input className="input" value={draft.contractorEmail} onChange={(e) => set('contractorEmail', e.target.value)} placeholder="quotes@rdunham.co.uk" spellCheck={false} />
+              <input
+                className="input"
+                value={draft.contractorEmail}
+                onChange={(e) => set("contractorEmail", e.target.value)}
+                placeholder="quotes@rdunham.co.uk"
+                spellCheck={false}
+              />
             </label>
             <label className="wide">
               <span>The client's blank template</span>
-              <input className="input file" type="file" accept=".xlsx" onChange={(e) => setTemplateFile(e.target.files?.[0] ?? null)} />
+              <input
+                className="input file"
+                type="file"
+                accept=".xlsx"
+                onChange={(e) => setTemplateFile(e.target.files?.[0] ?? null)}
+              />
               <em>
-                {templateFile ? `${templateFile.name} will be uploaded to a Templates folder on the site.` : 'Optional. Leave empty if the template is already in a Templates folder on that site. The app fills a copy of it and never re-saves the original.'}
+                {templateFile
+                  ? `${templateFile.name} will be uploaded to a Templates folder on the site.`
+                  : "Optional. Leave empty if the template is already in a Templates folder on that site. The app fills a copy of it and never re-saves the original."}
               </em>
             </label>
           </div>
@@ -316,32 +489,50 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
             </div>
           ) : (
             <p className="small muted" style={{ marginTop: 0 }}>
-              You will be sent to Microsoft's sign-in page and back. Nothing is sent anywhere else.
+              You will be sent to Microsoft's sign-in page and back. Nothing is
+              sent anywhere else.
             </p>
           )}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn" onClick={signIn} disabled={!ready || busy !== null}>
-              {busy === 'signin' ? 'Opening Microsoft…' : account ? 'Sign in as someone else' : 'Sign in with Microsoft'}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              className="btn"
+              onClick={signIn}
+              disabled={!ready || busy !== null}
+            >
+              {busy === "signin"
+                ? "Opening Microsoft…"
+                : account
+                  ? "Sign in as someone else"
+                  : "Sign in with Microsoft"}
             </button>
-            <button className="btn primary" onClick={run} disabled={!account || busy !== null}>
-              {busy === 'run' ? 'Setting up…' : 'Set up the site'} <Icon.arrow />
+            <button
+              className="btn primary"
+              onClick={run}
+              disabled={!account || busy !== null}
+            >
+              {busy === "run" ? "Setting up…" : "Set up the site"}{" "}
+              <Icon.arrow />
             </button>
           </div>
-          {!ready && <span className="small muted">Fill in the boxes above first.</span>}
+          {!ready && (
+            <span className="small muted">Fill in the boxes above first.</span>
+          )}
 
           {steps.length > 0 && (
             <div className="steps">
               {steps.map((s) => (
                 <div key={s.key} className={`step ${s.status}`}>
                   <span className="step-mark">
-                    {s.status === 'ok' && <Icon.check size={14} />}
-                    {s.status === 'warn' && <Icon.info size={14} />}
-                    {s.status === 'fail' && <Icon.x size={14} />}
-                    {s.status === 'running' && <span className="spin" />}
+                    {s.status === "ok" && <Icon.check size={14} />}
+                    {s.status === "warn" && <Icon.info size={14} />}
+                    {s.status === "fail" && <Icon.x size={14} />}
+                    {s.status === "running" && <span className="spin" />}
                   </span>
                   <div>
                     <b>{s.label}</b>
-                    {s.detail && <span className="step-detail">{s.detail}</span>}
+                    {s.detail && (
+                      <span className="step-detail">{s.detail}</span>
+                    )}
                     {s.fix && <span className="step-fix">{s.fix}</span>}
                   </div>
                 </div>
@@ -358,7 +549,8 @@ export function Connect({ onDemo, onLocal }: { onDemo: () => void; onLocal: () =
         </div>
 
         <p className="small muted center">
-          Stuck? Every step above can be done by hand instead — the list of columns and folders is in <span className="mono">docs/setup.md</span>.
+          Stuck? Every step above can be done by hand instead — the list of
+          columns and folders is in <span className="mono">docs/setup.md</span>.
           <br />
           <span className="mono tiny">Version {__BUILD_ID__}</span>
         </p>

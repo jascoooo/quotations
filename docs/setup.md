@@ -20,7 +20,7 @@ Quote Desk/                   a folder shared with the quoting team
   settings.json               the company and client names, shared
 ```
 
-One file per job is deliberate. A single board file would collide every time two people worked at once. Separate files only collide if two people edit the *same* job in the same moment, and then the later save wins, exactly as it would in a spreadsheet.
+One file per job is deliberate. A single board file would collide every time two people worked at once. Separate files only collide if two people edit the _same_ job in the same moment, and then the later save wins, exactly as it would in a spreadsheet.
 
 ## 1. Put the file somewhere you can open it
 
@@ -133,7 +133,6 @@ Neither needs an administrator to fix. If they start to bite, the Microsoft 365 
 
 ---
 
-
 # Connecting it to Microsoft 365
 
 Written for the person who will use the app, not for an IT department. Almost all of it you can do yourself in about twenty minutes. There is exactly one step that may need whoever holds your Microsoft 365 admin account, and it is a single button press.
@@ -148,7 +147,7 @@ Open the app and choose **Open it with example data**. You get a full board of m
 
 Two settings decide whether you can do this alone. Both are usually left at Microsoft's default, and both take a minute to test.
 
-**1. Can you register an app?** Go to [entra.microsoft.com](https://entra.microsoft.com) and find **App registrations**, then **New registration**. If the form opens, you are fine. Microsoft's default is that any user can do this: *"By default in Microsoft Entra ID, all users can register applications and manage all aspects of applications they create."* If your organisation has turned that off you get a clear refusal: *"You don't have permission to register applications in the … directory. To request access, contact your administrator."*
+**1. Can you register an app?** Go to [entra.microsoft.com](https://entra.microsoft.com) and find **App registrations**, then **New registration**. If the form opens, you are fine. Microsoft's default is that any user can do this: _"By default in Microsoft Entra ID, all users can register applications and manage all aspects of applications they create."_ If your organisation has turned that off you get a clear refusal: _"You don't have permission to register applications in the … directory. To request access, contact your administrator."_
 
 **2. Can you agree to the permissions?** You find this out at your first sign-in, and here honesty matters more than optimism: **you will probably see "Need admin approval"**. Microsoft's current recommended default for new tenants lets people consent to most things, but it specifically holds back the ones this app needs, including `Sites.ReadWrite.All`, `Files.ReadWrite.All` and `Mail.Read.Shared`. Older tenants, and any where an admin chose the permissive setting, will let you straight through.
 
@@ -171,17 +170,29 @@ At [entra.microsoft.com](https://entra.microsoft.com): **App registrations › N
 
 Then open **API permissions › Add a permission › Microsoft Graph › Delegated permissions** and add:
 
-| Permission | What it is for |
-| --- | --- |
-| `User.Read` | your name, so the board can say who moved a card |
-| `Mail.Read.Shared` | read the shared mailbox you already open in Outlook |
-| `Sites.ReadWrite.All` | the board list, the filing list and the job folders |
-| `Files.ReadWrite.All` | the document library and filling the Excel template |
-| `Sites.Manage.All` | creating the two lists and their columns, during setup only |
+| Permission            | What it is for                                              |
+| --------------------- | ----------------------------------------------------------- |
+| `User.Read`           | your name, so the board can say who moved a card            |
+| `Mail.Read.Shared`    | read the shared mailbox you already open in Outlook         |
+| `Sites.ReadWrite.All` | the board list, the filing list and the job folders         |
+| `Files.ReadWrite.All` | the document library and filling the Excel template         |
+| `Sites.Manage.All`    | creating the two lists and their columns, during setup only |
 
 All five are **delegated**, which is the important word: the app acts as you and can never reach anything you could not open yourself. None of them is flagged "admin consent required" in Microsoft's permissions reference. Do not add the application-only versions of these permissions; those are the ones that would let something run without a person, and the app never uses them.
 
 Copy the **Application (client) ID** and **Directory (tenant) ID** from the Overview page.
+
+### Finding the registration again afterwards
+
+The portal drops you back at its home page, not at the app you just made, so the second visit is the confusing one. The path is:
+
+**entra.microsoft.com › Applications › App registrations › the "All applications" tab › Quote Desk.**
+
+The "Owned applications" tab, which the page usually opens on, only lists apps where you were recorded as an owner, and a registration made in a hurry sometimes is not. "All applications" always has it. If you registered it more than once, open each one, check the Application (client) ID, keep one and press **Delete** on the other — duplicates are allowed and harmless, but only one of them will be the ID you paste into the app.
+
+Once the registration is open, everything else is in the **Manage** list down the left-hand side: **Authentication** for the redirect address, **API permissions** for the five permissions, **Overview** for the two IDs. If you cannot see that list, the pane is collapsed rather than missing — widen the window, or use the "«" control at the top of it.
+
+**Adding permissions and consenting to them are two different things.** On the API permissions page, **Add a permission** is the button you want, and it is open to the owner of the registration; it builds the list of what the app will ask for. **Grant admin consent for &lt;organisation&gt;** is the button next to it, it is greyed out unless you hold an admin role, and you do not press it to add anything. If it is greyed out, carry on regardless: add the five permissions, then sign in. Consent is asked for at sign-in, and only if that is refused does anyone else have to be involved.
 
 ## Step 2. Have a SharePoint site (two minutes, you)
 
@@ -236,16 +247,16 @@ Covered in full in `docs/hosting.md`: a free Hugging Face static page, built on 
 
 ## What needs an admin, and what does not
 
-| Step | Who |
-| --- | --- |
-| Register the app | You, unless your organisation has turned that off |
-| Create the SharePoint site | You |
-| Create the lists, columns, folders | The app, as you |
-| Upload the client's template | You |
-| **Agree to the permissions** | **Probably one press. Cloud Application Administrator is enough; it need not be a Global Administrator** |
-| Full Access to the shared mailbox | Already in place if you can open it in Outlook; otherwise an admin, and you cannot grant it to yourself |
-| "Assignment required" on the app | Optional. Skip it for testing: turning it on *forces* admin consent even where a user could otherwise consent alone |
-| Conditional Access, retention, audit logging | Optional hardening, later, admin |
+| Step                                         | Who                                                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Register the app                             | You, unless your organisation has turned that off                                                                   |
+| Create the SharePoint site                   | You                                                                                                                 |
+| Create the lists, columns, folders           | The app, as you                                                                                                     |
+| Upload the client's template                 | You                                                                                                                 |
+| **Agree to the permissions**                 | **Probably one press. Cloud Application Administrator is enough; it need not be a Global Administrator**            |
+| Full Access to the shared mailbox            | Already in place if you can open it in Outlook; otherwise an admin, and you cannot grant it to yourself             |
+| "Assignment required" on the app             | Optional. Skip it for testing: turning it on _forces_ admin consent even where a user could otherwise consent alone |
+| Conditional Access, retention, audit logging | Optional hardening, later, admin                                                                                    |
 
 One caveat on the mailbox: seeing it in Outlook usually means you have Full Access, but not always, since it can also appear through folder sharing. The reliable test is the app's own mailbox step. If it fails with a refusal, that is the one other thing only an admin can fix.
 
@@ -257,43 +268,43 @@ If the app's setup step fails and you would rather build the lists yourself, thi
 
 **A list called `Quotes`** — one row per job, and the shared live board:
 
-| Column (internal name) | Type | Notes |
-| --- | --- | --- |
-| Title | Text | the work order, e.g. SANC004958 |
-| PurchaseOrder | Text | |
-| Address | Text | |
-| Postcode | Text | |
-| LocationOfWorks | Text | |
-| JobTitle | Text | short description shown on the card |
-| Client | Text | |
-| Stage | Choice | exactly: `To review`, `To check and amend`, `Ready to send`, `Sent` |
-| ContactName | Text | |
-| ContactPhone | Text | |
-| DateIssued | Text | ISO date `yyyy-mm-dd`; text, because it can be empty |
-| Attended | Text | ISO date |
-| TypeOfWorks | Text | |
-| Priority | Text | Emergency / Urgent / Routine |
-| Total | Number | |
-| FolderUrl | Multiple lines of text (plain) | web link to the job folder |
-| FolderId | Text | |
-| QuoteFileName | Multiple lines of text (plain) | |
-| QuoteJson | Multiple lines of text (plain) | the draft quote |
-| ReportJson | Multiple lines of text (plain) | the engineer's report and which email it came from |
-| PhotosJson | Multiple lines of text (plain) | which photos are ticked |
-| SourcesJson | Multiple lines of text (plain) | where each detail was found |
-| FlagJson | Multiple lines of text (plain) | the status line on the card |
+| Column (internal name) | Type                           | Notes                                                               |
+| ---------------------- | ------------------------------ | ------------------------------------------------------------------- |
+| Title                  | Text                           | the work order, e.g. SANC004958                                     |
+| PurchaseOrder          | Text                           |                                                                     |
+| Address                | Text                           |                                                                     |
+| Postcode               | Text                           |                                                                     |
+| LocationOfWorks        | Text                           |                                                                     |
+| JobTitle               | Text                           | short description shown on the card                                 |
+| Client                 | Text                           |                                                                     |
+| Stage                  | Choice                         | exactly: `To review`, `To check and amend`, `Ready to send`, `Sent` |
+| ContactName            | Text                           |                                                                     |
+| ContactPhone           | Text                           |                                                                     |
+| DateIssued             | Text                           | ISO date `yyyy-mm-dd`; text, because it can be empty                |
+| Attended               | Text                           | ISO date                                                            |
+| TypeOfWorks            | Text                           |                                                                     |
+| Priority               | Text                           | Emergency / Urgent / Routine                                        |
+| Total                  | Number                         |                                                                     |
+| FolderUrl              | Multiple lines of text (plain) | web link to the job folder                                          |
+| FolderId               | Text                           |                                                                     |
+| QuoteFileName          | Multiple lines of text (plain) |                                                                     |
+| QuoteJson              | Multiple lines of text (plain) | the draft quote                                                     |
+| ReportJson             | Multiple lines of text (plain) | the engineer's report and which email it came from                  |
+| PhotosJson             | Multiple lines of text (plain) | which photos are ticked                                             |
+| SourcesJson            | Multiple lines of text (plain) | where each detail was found                                         |
+| FlagJson               | Multiple lines of text (plain) | the status line on the card                                         |
 
 The five `…Json` columns and `FolderUrl` must be multi-line text: single-line text in SharePoint stops at 255 characters and a quote is longer than that.
 
 **A list called `Quote inbox`** — which email went where, so nothing is filed twice:
 
-| Column (internal name) | Type |
-| --- | --- |
-| Title | Text (the message id) |
-| ConversationId | Multiple lines of text (plain) |
-| JobId | Text |
-| Rule | Text |
-| Ignored | Yes/No |
+| Column (internal name) | Type                           |
+| ---------------------- | ------------------------------ |
+| Title                  | Text (the message id)          |
+| ConversationId         | Multiple lines of text (plain) |
+| JobId                  | Text                           |
+| Rule                   | Text                           |
+| Ignored                | Yes/No                         |
 
 Then fill in `config.json` from `public/config.example.json` with the site id, the two list ids, the drive id and the template's item id. The quickest way to find those is Graph Explorer signed in as yourself.
 
@@ -301,17 +312,17 @@ SharePoint's own **Board view** on the Quotes list, organised by `Stage`, gives 
 
 ## When it goes wrong
 
-| What you see | What it means |
-| --- | --- |
-| "Need admin approval" | The consent gate. See step 3. |
-| "You don't have permission to register applications" | Your organisation has turned off self-service app registration. The admin either registers it for you and adds you as owner, or gives you the Application Developer role. |
-| The redirect address is rejected (AADSTS50011) | The address you opened the app at is not on the registration. Copy it from the browser bar and add it under Authentication › Single-page application. |
-| "Your account is not assigned to this app" (AADSTS50105) | Someone turned on Assignment required. Either add yourself under the enterprise application's Users and groups, or turn it off. |
-| The site step fails with a refusal | You are not an owner of that site, or the address points somewhere else. Open the site in SharePoint and copy the address bar again. |
-| The list step fails with a refusal | Usually the `Sites.Manage.All` permission is missing from the registration, or consent has not been given for it. |
-| The mailbox step fails with a refusal | Your account does not have Full Access to that mailbox. Only an admin can grant it. |
-| "Could not obtain a WAC access token" | Excel on the web could not open the template. The account needs an Office licence including Excel for the web, and the file must be a real `.xlsx` in SharePoint. |
-| Everything worked, but colleagues see the setup screen | `config.json` has not been published yet. Step 4. |
+| What you see                                             | What it means                                                                                                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Need admin approval"                                    | The consent gate. See step 3.                                                                                                                                             |
+| "You don't have permission to register applications"     | Your organisation has turned off self-service app registration. The admin either registers it for you and adds you as owner, or gives you the Application Developer role. |
+| The redirect address is rejected (AADSTS50011)           | The address you opened the app at is not on the registration. Copy it from the browser bar and add it under Authentication › Single-page application.                     |
+| "Your account is not assigned to this app" (AADSTS50105) | Someone turned on Assignment required. Either add yourself under the enterprise application's Users and groups, or turn it off.                                           |
+| The site step fails with a refusal                       | You are not an owner of that site, or the address points somewhere else. Open the site in SharePoint and copy the address bar again.                                      |
+| The list step fails with a refusal                       | Usually the `Sites.Manage.All` permission is missing from the registration, or consent has not been given for it.                                                         |
+| The mailbox step fails with a refusal                    | Your account does not have Full Access to that mailbox. Only an admin can grant it.                                                                                       |
+| "Could not obtain a WAC access token"                    | Excel on the web could not open the template. The account needs an Office licence including Excel for the web, and the file must be a real `.xlsx` in SharePoint.         |
+| Everything worked, but colleagues see the setup screen   | `config.json` has not been published yet. Step 4.                                                                                                                         |
 
 Once set up, **Setup & data › Check connection** runs the same probes read-only and tells you which part is unhappy.
 
